@@ -24,9 +24,9 @@ hs_err_pid*
 
 .gradle
 .idea
-FizzBuzz/.gradle/
-FizzBuzz/.idea/
-FizzBuzz/gradle/
-Fizzbuzz/build/
+Fizz/.gradle/
+Fizz/.idea/
+Fizz/gradle/
+Fizz/build/
 
 Args/build/
