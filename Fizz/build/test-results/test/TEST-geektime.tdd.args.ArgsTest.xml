@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="geektime.tdd.args.ArgsTest" tests="7" skipped="2" failures="0" errors="0" timestamp="2022-03-24T06:01:47" hostname="escrays-MBP" time="0.033">
+  <properties/>
+  <testcase name="should_set_boolean_option_to_true_if_flag_present()" classname="geektime.tdd.args.ArgsTest" time="0.022"/>
+  <testcase name="should_set_boolean_option_to_false_if_flag_not_present()" classname="geektime.tdd.args.ArgsTest" time="0.002"/>
+  <testcase name="should_parse_int_as_option_value()" classname="geektime.tdd.args.ArgsTest" time="0.001"/>
+  <testcase name="should_example_1()" classname="geektime.tdd.args.ArgsTest" time="0.0">
+    <skipped/>
+  </testcase>
+  <testcase name="should_example_2()" classname="geektime.tdd.args.ArgsTest" time="0.0">
+    <skipped/>
+  </testcase>
+  <testcase name="should_parse_multi_options()" classname="geektime.tdd.args.ArgsTest" time="0.002"/>
+  <testcase name="should_parse_string_as_option_value()" classname="geektime.tdd.args.ArgsTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
