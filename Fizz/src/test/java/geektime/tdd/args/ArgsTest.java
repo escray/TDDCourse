@@ -11,21 +11,6 @@ public class ArgsTest {
     // map {-l: [], -p:[8080], -d:[/usr/logs]}
     // single option:
     // - Bool -l
-    @Test
-    public void should_set_boolean_option_to_true_if_flag_present(){
-        BooleanOption option = Args.parse(BooleanOption.class, "-l");
-
-        assertTrue(option.logging());
-    }
-
-    @Test
-    public void should_set_boolean_option_to_false_if_flag_not_present(){
-        BooleanOption option  = Args.parse(BooleanOption.class);
-
-        assertFalse(option.logging());
-    }
-
-    static record BooleanOption(@Option("l") boolean logging) {}
 
     // - Integer -p 8080
     @Test
@@ -34,7 +19,7 @@ public class ArgsTest {
         assertEquals(8080, option.port());
     }
 
-    static record IntOption(@Option("p") int port) {}
+
 
     // - String -d /usr/logs
     @Test
@@ -42,20 +27,41 @@ public class ArgsTest {
         StringOption option = Args.parse(StringOption.class, "-d", "/usr/logs");
         assertEquals("/usr/logs", option.directory());
     }
+
+    static record IntOption(@Option("p") int port) {}
+
     static record StringOption(@Option("d") String directory) {}
-    // TODO: multi options: -l -p 8080 -d /usr/logs
+    // multi options: -l -p 8080 -d /usr/logs
     @Test
     public void should_parse_multi_options() {
         MultiOptions options = Args.parse(MultiOptions.class, "-l", "-p", "8080", "-d", "/usr/logs");
         assertTrue(options.logging());
     }
 
+    // BooleanOptionParserTest:
     // sad path:
     // TODO: - bool -l t / -l t f
+    // default:
+    // TODO: - bool : false
+
+//    @Test
+//    public void should_not_accept_extra_argument_for_boolean_option() {
+//        TooManyArgumentsException e = assertThrows(TooManyArgumentsException.class, () -> Args.parse(BooleanOption.class, "-l", "t"));
+//        assertEquals("l", e.getOption());
+//    }
+
+//    @Test
+//    public void should_not_accept_extra_argument_for_boolean_option_2() {
+//        TooManyArgumentsException e = assertThrows(TooManyArgumentsException.class, () -> new BooleanParser().parse(asList("-l", "t"), option("l")));
+//        assertEquals("l", e.getOption());
+//    }
+
+
+    // SingleValueOptionParserTest:
+    // sad path:
     // TODO: - int -p / -p 8080 8081
     // TODO: - string -d / -d /usr/logs /usr/vars
     // default value
-    // TODO: - bool : false
     // TODO: - int : 0
     // TODO: - string : ""
 
