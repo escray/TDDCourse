@@ -16,12 +16,16 @@ public class Args {
             Object[] values = Arrays.stream(constructor.getParameters()).map(it -> parseOption(arguments, it)).toArray();
 
             return (T) constructor.newInstance(values);
+        } catch(IllegalOptionException e) {
+            throw e;
         } catch(Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     private static Object parseOption(List<String> arguments, Parameter parameter) {
+        if (!parameter.isAnnotationPresent(Option.class))
+            throw new IllegalOptionException(parameter.getName());
         return PARSERS.get(parameter.getType()).parse(arguments, parameter.getAnnotation(Option.class));
     }
 
