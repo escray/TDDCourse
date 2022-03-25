@@ -2,6 +2,7 @@ package geektime.tdd.args;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 class SingleValuedOptionParser<T> implements OptionParser<T> {
     Function<String, T> valueParser;
@@ -17,28 +18,23 @@ class SingleValuedOptionParser<T> implements OptionParser<T> {
         int index = arguments.indexOf("-" + option.value());
         if (index == -1) return defaultValue;
 
-        // 达到列表末尾？
-        // 通过注释还是通过方法名来表明意图
-        if (isReachEndOfList(arguments, index) ||
-                isFollowedByOtherFlag(arguments, index))
+        List<String> values = getFollowingValues(arguments, index);
+
+        if (values.size() < 1)
             throw new InsufficientArgumentException(option.value());
 
-        if (secondArgumentIsNotFollowedByAFlag(arguments, index)
-        ) throw new TooManyArgumentsException(option.value());
+        if (values.size() > 1)
+            throw new TooManyArgumentsException(option.value());
 
         return valueParser.apply(arguments.get(index + 1));
     }
 
-    private boolean secondArgumentIsNotFollowedByAFlag(List<String> arguments, int index) {
-        return index + 2 < arguments.size()
-                && !arguments.get(index + 2).contains("-");
-    }
+    private List<String> getFollowingValues(List<String> arguments, int index) {
+        int followingFlag = IntStream.range(index + 1, arguments.size())
+                .filter(it -> arguments.get(it).startsWith("-"))
+                .findFirst().orElse(arguments.size());
 
-    private boolean isFollowedByOtherFlag(List<String> arguments, int index) {
-        return arguments.get(index + 1).startsWith("-");
-    }
-
-    private boolean isReachEndOfList(List<String> arguments, int index) {
-        return index + 1 == arguments.size();
+        List<String> values = arguments.subList(index + 1, followingFlag);
+        return values;
     }
 }
