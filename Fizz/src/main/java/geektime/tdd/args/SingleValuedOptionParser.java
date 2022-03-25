@@ -22,19 +22,21 @@ class SingleValuedOptionParser<T> implements OptionParser<T> {
 
         if (values.size() < 1)
             throw new InsufficientArgumentException(option.value());
-
         if (values.size() > 1)
             throw new TooManyArgumentsException(option.value());
 
-        return valueParser.apply(arguments.get(index + 1));
+        String value = values.get(0);
+
+        try {
+            return valueParser.apply(value);
+        } catch (Exception e) {
+            throw new IllegalValueException(option.value(), values);
+        }
     }
 
     private List<String> getFollowingValues(List<String> arguments, int index) {
-        int followingFlag = IntStream.range(index + 1, arguments.size())
+        return arguments.subList(index + 1, IntStream.range(index + 1, arguments.size())
                 .filter(it -> arguments.get(it).startsWith("-"))
-                .findFirst().orElse(arguments.size());
-
-        List<String> values = arguments.subList(index + 1, followingFlag);
-        return values;
+                .findFirst().orElse(arguments.size()));
     }
 }
