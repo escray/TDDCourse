@@ -81,7 +81,7 @@ public class ArgsTest {
 
 
 
-    static record ListOptions(@Option("g") String[] group, @Option("d") int[] decimals) {
+    record ListOptions(@Option("g") String[] group, @Option("d") int[] decimals) {
     }
 
 //    @Test
