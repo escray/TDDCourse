@@ -115,6 +115,7 @@ class OptionParsersTest {
             String[] value = OptionParsers.list(String[]::new, String::valueOf).parse(asList(), option("g"));
             assertEquals(0, value.length);
         }
+
         // TODO: -d a throw exception
         @Test
         public void should_throw_exception_if_value_parser_cant_parse_value() {
