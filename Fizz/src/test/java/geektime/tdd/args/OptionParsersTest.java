@@ -103,6 +103,12 @@ class OptionParsersTest {
             assertArrayEquals(new String[]{"this", "is"}, value);
         }
 
+        @Test
+        public void should_not_treat_negative_int_as_flag() {
+            Integer[] value = OptionParsers.list(Integer[]::new, Integer::parseInt).parse(asList("-g", "-1", "-2"), option("g"));
+            assertArrayEquals(new Integer[]{-1, -2}, value);
+        }
+
         // TODO: default value []
         @Test
         public void should_use_empty_array_as_default_value() {

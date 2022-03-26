@@ -1,7 +1,6 @@
 package geektime.tdd.args;
 
 import geektime.tdd.args.Exceptions.IllegalOptionException;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -62,7 +61,6 @@ public class ArgsTest {
 
 
     @Test
-    @Disabled
     public void should_example_1(){
         MultiOptions options = Args.parse(MultiOptions.class, "-l", "-p", "8080", "-d", "/usr/logs");
         assertTrue(options.logging());
@@ -71,17 +69,14 @@ public class ArgsTest {
     }
 
     @Test
-    @Disabled
     public void should_example_2(){
         ListOptions options = Args.parse(ListOptions.class, "-g", "this", "is", "a", "list", "-d", "1", "2", "-3", "5");
 
         assertArrayEquals(new String[]{"this", "is", "a", "list"}, options.group());
-        assertArrayEquals(new int[]{1, 2, -3, 5}, options.decimals());
+        assertArrayEquals(new Integer[]{1, 2, -3, 5}, options.decimals());
     }
 
-
-
-    record ListOptions(@Option("g") String[] group, @Option("d") int[] decimals) {
+    record ListOptions(@Option("g") String[] group, @Option("d") Integer[] decimals) {
     }
 
 //    @Test
