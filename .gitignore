@@ -30,3 +30,8 @@ Fizz/gradle/
 Fizz/build/
 
 Args/build/
+
+*/gradle/
+*/build/
+*/.gradle/
+*/.idea/
