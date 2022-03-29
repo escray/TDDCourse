@@ -12,7 +12,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class StudentRRepositoryTest {
+class StudentRepositoryTest {
     private EntityManagerFactory factory;
     private EntityManager manager;
     private StudentRepository repository;
@@ -53,7 +53,7 @@ class StudentRRepositoryTest {
         assertEquals(john.getFirstName(), loaded.get().getFirstName());
         assertEquals(john.getLastName(), loaded.get().getLastName());
         assertEquals(john.getEmail(), loaded.get().getEmail());
-//      assertEquals(john.getId(), loaded.get().getId());
+//        assertEquals(john.getId(), loaded.get().getId());
     }
 
     @AfterEach
@@ -62,5 +62,4 @@ class StudentRRepositoryTest {
         manager.close();
         factory.close();
     }
-
 }

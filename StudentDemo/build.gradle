@@ -21,9 +21,12 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
+    implementation 'javax.inject:javax.inject:1'
     compileOnly('javax.persistence:javax.persistence-api:2.2')
+    compileOnly('javax.ws.rs:javax.ws.rs-api:2.1.1')
     implementation('org.hibernate:hibernate-core:5.6.7.Final')
     implementation('org.hsqldb:hsqldb:2.6.1')
+    implementation('org.glassfish.jersey.containers:jersey-container-jetty-http:3.0.4')
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
