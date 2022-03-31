@@ -38,3 +38,4 @@ Args/build/
 */target/
 */myDB/
 /run-it-maven/
+/jax-rs/
