@@ -37,3 +37,5 @@ Args/build/
 */.idea/
 */target/
 */myDB/
+jax-rs/
+run-it-maven/
