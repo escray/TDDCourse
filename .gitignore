@@ -24,9 +24,10 @@ hs_err_pid*
 
 .gradle
 .idea
-Fizz/.gradle/
-Fizz/.idea/
-Fizz/gradle/
-Fizz/build/
+*/.gradle/
+*/.idea/
+*/gradle/
+*/build/
 
-Args/build/
+jax-rs/
+jersey-jetty/
