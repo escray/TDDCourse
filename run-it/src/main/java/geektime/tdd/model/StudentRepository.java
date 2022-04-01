@@ -31,7 +31,7 @@ public class StudentRepository {
         return Optional.ofNullable(manager.find(Student.class, id));
     }
 
-    public Optional<Student> findByEmail(String email) {
+    public Optional<Student> findByEmailFromDB(String email) {
         TypedQuery<Student> query = manager.createQuery("SELECT s FROM Student s WHERE s.email = :email", Student.class);
         return query.setParameter("email", email).getResultList().stream().findFirst();
     }

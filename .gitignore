@@ -24,18 +24,12 @@ hs_err_pid*
 
 .gradle
 .idea
-Fizz/.gradle/
-Fizz/.idea/
-Fizz/gradle/
-Fizz/build/
-
-Args/build/
-
 */gradle/
 */build/
 */.gradle/
 */.idea/
 */target/
 */myDB/
+*/out/
 /run-it-maven/
 /jax-rs/
