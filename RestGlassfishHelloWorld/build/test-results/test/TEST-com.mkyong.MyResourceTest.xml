@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mkyong.MyResourceTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2022-03-31T05:40:56" hostname="escrays-MBP" time="0.193">
+  <properties/>
+  <testcase name="testHello()" classname="com.mkyong.MyResourceTest" time="0.186"/>
+  <testcase name="testHelloName()" classname="com.mkyong.MyResourceTest" time="0.006"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Mar 31, 2022 1:40:55 PM com.mkyong.MainApp startServer
+INFO: Starting Server...
+Mar 31, 2022 1:40:56 PM org.glassfish.jersey.message.internal.MessagingBinders$EnabledProvidersBinder bindToBinder
+WARNING: A class jakarta.activation.DataSource for a default provider MessageBodyWriter<jakarta.activation.DataSource> was not found. The provider is not available.
+Mar 31, 2022 1:40:56 PM org.glassfish.jersey.server.wadl.WadlFeature configure
+WARNING: JAX-B API not found . WADL feature is disabled.
+Mar 31, 2022 1:40:56 PM org.glassfish.grizzly.http.server.NetworkListener start
+INFO: Started listener bound to [localhost:8080]
+Mar 31, 2022 1:40:56 PM org.glassfish.grizzly.http.server.HttpServer start
+INFO: [HttpServer] Started.
+Mar 31, 2022 1:40:56 PM org.glassfish.jersey.message.internal.MessagingBinders$EnabledProvidersBinder bindToBinder
+WARNING: A class jakarta.activation.DataSource for a default provider MessageBodyWriter<jakarta.activation.DataSource> was not found. The provider is not available.
+Mar 31, 2022 1:40:56 PM org.glassfish.grizzly.http.server.NetworkListener shutdownNow
+INFO: Stopped listener bound to [localhost:8080]
+]]></system-err>
+</testsuite>
