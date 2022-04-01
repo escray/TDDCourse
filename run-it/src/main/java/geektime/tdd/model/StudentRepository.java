@@ -9,6 +9,10 @@ public class StudentRepository {
     private EntityManager manager;
     private List<Student> students;
 
+    public StudentRepository() {
+        this.students = new ArrayList<>();
+    }
+
     public StudentRepository(EntityManager manager) {
         this.manager = manager;
     }
@@ -37,10 +41,12 @@ public class StudentRepository {
     }
 
     public void save(Student student) {
+
         if (student.getId() == 0) {
-            student = new Student(students.get(students.size()-1).getId() + 1,
+            student = new Student(students.size() == 0 ? 1L : students.get(students.size() - 1).getId() + 1,
                     student.getFirstName(), student.getLastName(), student.getEmail());
         }
+
         students.add(student);
     }
 

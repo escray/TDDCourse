@@ -9,7 +9,6 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 
 import java.util.List;
-import java.util.stream.IntStream;
 
 @Path("/students")
 public class StudentsResource {
@@ -45,16 +44,9 @@ public class StudentsResource {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response save(MultivaluedMap<String, String> form) {
-        List<String> firstNames = form.get("students[first_name]");
-        List<String> lastNames = form.get("students[last_name]");
-        List<String> emails = form.get("students[email]");
-
-        IntStream.range(0, firstNames.size())
-                .mapToObj(it -> new Student(firstNames.get(it)
-                        , lastNames.get(it)
-                        , emails.get(it)))
-                .forEach(repository::saveToDB);
+        FormHelper.toStudents(form).forEach(repository::save);
 
         return Response.created(null).build();
     }
+
 }
