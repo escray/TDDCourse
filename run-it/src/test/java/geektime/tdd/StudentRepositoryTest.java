@@ -26,7 +26,7 @@ class StudentRepositoryTest {
         repository = new StudentRepository(manager);
 
         manager.getTransaction().begin();
-        john = repository.save(new Student("john", "smith", "john.smith@email.com"));
+        john = repository.saveToDB(new Student("john", "smith", "john.smith@email.com"));
         manager.getTransaction().commit();
     }
 
@@ -44,7 +44,7 @@ class StudentRepositoryTest {
 
     @Test
     void should_be_able_to_load_saved_student_by_id() {
-        Optional<Student> loaded = repository.findById(john.getId());
+        Optional<Student> loaded = repository.findByIdFromDB(john.getId());
         assertTrue(loaded.isPresent());
         assertEquals(john.getFirstName(), loaded.get().getFirstName());
         assertEquals(john.getLastName(), loaded.get().getLastName());
