@@ -7,12 +7,14 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InOrder;
 
 import java.lang.annotation.Annotation;
 import java.util.function.Function;
 
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class OptionParsersTest {
 
@@ -63,7 +65,14 @@ class OptionParsersTest {
             assertEquals(8080, OptionParsers.unary(0, Integer::parseInt).parse(asList("-p", "8080"), option("p")));
         }
 
+        // Behavior Verification
+        @Test
+        public void should_parse_value_if_flag_present_behavior() {
+            Function parser = mock(Function.class);
+            OptionParsers.unary(any(), parser).parse(asList("-p", "8080"), option("p"));
 
+            verify(parser).apply("8080");
+        }
     }
 
     @Nested
@@ -98,11 +107,24 @@ class OptionParsersTest {
 
     @Nested
     class ListOptionParser {
-        // TODO: -g "this" "is" {"this", "is"}
+        // DONE: -g "this" "is" {"this", "is"}
+        // State Verification
         @Test
         public void should_parse_list_value() {
             String[] value = OptionParsers.list(String[]::new, String::valueOf).parse(asList("-g", "this", "is"), option("g"));
             assertArrayEquals(new String[]{"this", "is"}, value);
+        }
+
+        // Behavior
+        @Test
+        public void should_parse_list_value_behavior() {
+            Function parser = mock(Function.class);
+
+            OptionParsers.list(Object[]::new, parser).parse(asList("-g", "this", "is"), option("g"));
+
+            InOrder order = inOrder(parser, parser);
+            order.verify(parser).apply("this");
+            order.verify(parser).apply("is");
         }
 
         @Test
