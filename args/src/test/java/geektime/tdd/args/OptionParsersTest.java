@@ -54,6 +54,7 @@ class OptionParsersTest {
         }
 
         @Test // Happy path
+        // State Verification
         public void should_parse_value_if_flag_present() {
             Object parsed = new Object();
             Function<String, Object> parse = (it) -> parsed;
@@ -61,6 +62,7 @@ class OptionParsersTest {
             assertSame(parsed, OptionParsers.unary(whatever, parse).parse(asList("-p", "8080"), option("p")));
             assertEquals(8080, OptionParsers.unary(0, Integer::parseInt).parse(asList("-p", "8080"), option("p")));
         }
+
 
     }
 
