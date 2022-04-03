@@ -52,7 +52,7 @@ class StudentRepositoryTest {
         assertEquals(john.getFirstName(), loaded.get().getFirstName());
         assertEquals(john.getLastName(), loaded.get().getLastName());
         assertEquals(john.getEmail(), loaded.get().getEmail());
-//        assertEquals(john.getId(), loaded.get().getId());
+        assertEquals(john.getId(), loaded.get().getId());
     }
 
     @AfterEach

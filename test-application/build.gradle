@@ -22,15 +22,10 @@ tasks.withType(JavaCompile) {
 
 dependencies {
 
-    compileOnly('jakarta.enterprise:jakarta.enterprise.cdi-api:3.0.1')
-    implementation('jakarta.ws.rs:jakarta.ws.rs-api:3.0.0')
-    compileOnly('jakarta.servlet:jakarta.servlet-api:5.0.0')
-
-
+    implementation('jakarta.enterprise:jakarta.enterprise.cdi-api:3.0.1')
+    implementation('org.mockito:mockito-core:4.4.0')
     implementation('org.eclipse.persistence:org.eclipse.persistence.jpa:3.0.2')
     implementation('org.hsqldb:hsqldb:2.6.1')
-    implementation('org.glassfish.jersey.containers:jersey-container-jetty-http:3.0.4')
-    implementation('org.glassfish.jersey.test-framework:jersey-test-framework-core:3.0.4')
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
