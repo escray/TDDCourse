@@ -1,6 +1,7 @@
 package geektime.tdd.args;
 
 import geektime.tdd.args.Exceptions.IllegalOptionException;
+import geektime.tdd.args.Exceptions.UnsupportedOptionTypeException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
@@ -10,12 +11,11 @@ import java.util.Map;
 
 public class Args {
     public static <T> T parse(Class<T> optionsClass, String... args) {
-
         try {
             List<String> arguments = Arrays.asList(args);
             Constructor<?> constructor = optionsClass.getDeclaredConstructors()[0];
 
-            Object[] values = Arrays.stream(constructor.getParameters()).map(it -> parseOption(arguments, it)).toArray();
+            Object[] values = Arrays.stream(constructor.getParameters()).map(it -> parseOption(arguments, it, PARSERS)).toArray();
 
             return (T) constructor.newInstance(values);
         } catch (IllegalOptionException e) {
@@ -23,13 +23,17 @@ public class Args {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
-    private static Object parseOption(List<String> arguments, Parameter parameter) {
+    private static Object parseOption(List<String> arguments, Parameter parameter, Map<Class<?>, OptionParser> parsers) {
+
         if (!parameter.isAnnotationPresent(Option.class))
             throw new IllegalOptionException(parameter.getName());
-        return PARSERS.get(parameter.getType()).parse(arguments, parameter.getAnnotation(Option.class));
+        Option option = parameter.getAnnotation(Option.class);
+        if (!parsers.containsKey(parameter.getType())) {
+            throw new UnsupportedOptionTypeException(option.value(), parameter.getType());
+        }
+        return parsers.get(parameter.getType()).parse(arguments, option);
     }
 
     private static Map<Class<?>, OptionParser> PARSERS = Map.of(

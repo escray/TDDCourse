@@ -20,7 +20,7 @@ public class ArgsTest {
         assertEquals("/usr/logs", options.directory());
     }
 
-    static record MultiOptions(@Option("l") boolean logging, @Option("p") int port, @Option("d") String directory) {
+    record MultiOptions(@Option("l") boolean logging, @Option("p") int port, @Option("d") String directory) {
     }
 
     @Test

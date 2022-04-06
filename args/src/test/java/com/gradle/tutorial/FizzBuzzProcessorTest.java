@@ -1,4 +1,4 @@
-package com.gradle.turorial;
+package com.gradle.tutorial;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

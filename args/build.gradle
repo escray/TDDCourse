@@ -1,11 +1,14 @@
 plugins {
     id 'application'
-
-
 }
 
 application {
-    mainClassName = 'com.gradle.turorial.FizzBuzzProcessor'
+    mainClassName = 'com.gradle.tutorial.FizzBuzzProcessor'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 group 'code.geektime'
@@ -30,19 +33,9 @@ test {
 //    manifest {
 //        attributes "Main-Class": "com.gradle.tutorial.FizzBuzzProcessor"
 //    }
+//
 //    from {
-//        configurations.runtimeClasspath.collect { it.isDirectory()? it : zipTree(it) }
+//        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
 //    }
 //}
-
-
-jar {
-    manifest {
-        attributes "Main-Class": "com.gradle.tutorial.FizzBuzzProcessor"
-    }
-
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-}
 
