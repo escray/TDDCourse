@@ -32,7 +32,7 @@ public class ArgsTest {
         assertEquals("port", e.getParameter());
     }
 
-    static record OptionsWithoutAnnotation(@Option("l") boolean logging, int port, @Option("d") String directory) {
+    record OptionsWithoutAnnotation(@Option("l") boolean logging, int port, @Option("d") String directory) {
     }
     // BooleanOptionParserTest:
     // sad path:
@@ -113,4 +113,5 @@ public class ArgsTest {
         assertEquals(1000, options.port());
         assertEquals("parsed", options.directory());
     }
+
 }

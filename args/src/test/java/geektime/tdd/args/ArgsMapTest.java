@@ -4,8 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ArgsMapTest {
     // option without value, -b
@@ -53,4 +52,50 @@ public class ArgsMapTest {
         assertArrayEquals(new String[]{"this", "is", "a", "list"}, args.get("g"));
         assertArrayEquals(new String[]{"1", "2", "-3", "5"}, args.get("d"));
     }
+
+    @Test
+    public void should_parse_bool_option() {
+        ArgsMap<BoolOption> args = new ArgsMap<>(BoolOption.class, Map.of(boolean.class, ArgsMapTest::parseBool));
+        BoolOption option = args.parse("-l");
+        assertTrue(option.logging);
+    }
+
+    @Test
+    public void should_parse_int_option() {
+        ArgsMap<IntOption> args = new ArgsMap<>(IntOption.class, Map.of(int.class, ArgsMapTest::parseInt));
+        IntOption option = args.parse("-p", "8080");
+        assertEquals(8080, option.port);
+    }
+
+    record BoolOption(@Option("l") boolean logging) {
+    }
+
+    record IntOption(@Option("p") int port) {
+    }
+
+
+    private static boolean parseBool(String[] values) {
+        checkSize(values, 0);
+        return values != null;
+    }
+
+    private static int parseInt(String[] values) {
+        checkSize(values, 1);
+        return Integer.parseInt(values[0]);
+    }
+
+    private static void checkSize(String[] values, int size) {
+        if (values != null && values.length != size) {
+            throw new RuntimeException();
+        }
+    }
+
+//    public static OptionParser<Boolean> bool() {
+//        return (arguments, option) -> values(arguments, option, 0).map(it -> true).orElse(assertFalse());
+//    }
+
+//    public static <T> OptionParser<T> unary(T defaultValue, Function<String, T> valueParser) {
+//        return (arguments, option) -> values(arguments, option, 1)
+//                .map(it -> parseValue(option, it.get(0), valueParser)).orElse(defaultValue);
+//    }
 }
