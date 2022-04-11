@@ -21,9 +21,8 @@ public class Args<T> {
 
     // 对外的 API 接口
     public static <T> T parse(Class<T> optionsClass, String... args) {
-        //return new Args<T>(optionsClass, PARSERS).parse(args);
-        //return parse(optionsClass, PARSERS, args);
-        return new OptionClass<T>(optionsClass, PARSERS).parse(args);
+        return new Args<T>(optionsClass, PARSERS).parse(args);
+//        return parse(optionsClass, PARSERS, args);
     }
 
     private Class<T> optionsClass;
