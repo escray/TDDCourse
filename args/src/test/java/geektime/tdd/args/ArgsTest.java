@@ -108,7 +108,7 @@ public class ArgsTest {
 
         Args<MultiOptions> args = new Args<>(MultiOptions.class, Map.of(boolean.class, boolParser,
                 int.class, intParser, String.class, stringParser));
-        MultiOptions options = args.parse("-l", "-p", "8080", "-d", "/usr/logs");
+        MultiOptions options = args.parse("-l", "-p", "1000", "-d", "parsed");
         assertTrue(options.logging());
         assertEquals(1000, options.port());
         assertEquals("parsed", options.directory());

@@ -111,7 +111,7 @@ class OptionParsersTest {
         // State Verification
         @Test
         public void should_parse_list_value() {
-            String[] value = OptionParsers.list(String[]::new, String::valueOf).parse(asList("-g", "this", "is"), option("g"));
+            String[] value = OptionParsers.list(String::valueOf, String[]::new).parse(asList("-g", "this", "is"), option("g"));
             assertArrayEquals(new String[]{"this", "is"}, value);
         }
 
@@ -120,7 +120,7 @@ class OptionParsersTest {
         public void should_parse_list_value_behavior() {
             Function parser = mock(Function.class);
 
-            OptionParsers.list(Object[]::new, parser).parse(asList("-g", "this", "is"), option("g"));
+            ((OptionParser<Object[]>) OptionParsers.list(parser, Object[]::new)).parse(asList("-g", "this", "is"), option("g"));
 
             InOrder order = inOrder(parser, parser);
             order.verify(parser).apply("this");
@@ -129,14 +129,14 @@ class OptionParsersTest {
 
         @Test
         public void should_not_treat_negative_int_as_flag() {
-            Integer[] value = OptionParsers.list(Integer[]::new, Integer::parseInt).parse(asList("-g", "-1", "-2"), option("g"));
+            Integer[] value = OptionParsers.list(Integer::parseInt, Integer[]::new).parse(asList("-g", "-1", "-2"), option("g"));
             assertArrayEquals(new Integer[]{-1, -2}, value);
         }
 
         // TODO: default value []
         @Test
         public void should_use_empty_array_as_default_value() {
-            String[] value = OptionParsers.list(String[]::new, String::valueOf).parse(asList(), option("g"));
+            String[] value = OptionParsers.list(String::valueOf, String[]::new).parse(asList(), option("g"));
             assertEquals(0, value.length);
         }
 
@@ -146,8 +146,7 @@ class OptionParsersTest {
             Function<String, String> parser = (it) -> {
                 throw new RuntimeException();
             };
-            IllegalValueException e = assertThrows(IllegalValueException.class, () ->
-                    OptionParsers.list(String[]::new, parser).parse(asList("-g", "this", "is"), option("g")));
+            IllegalValueException e = assertThrows(IllegalValueException.class, () -> OptionParsers.list(parser, String[]::new).parse(asList("-g", "this", "is"), option("g")));
             assertEquals("g", e.getOption());
             assertEquals("this", e.getValue());
 

@@ -15,15 +15,41 @@ public class Args<T> {
             boolean.class, OptionParsers.bool(),
             int.class, OptionParsers.unary(0, Integer::parseInt),
             String.class, OptionParsers.unary("", String::valueOf),
-            String[].class, OptionParsers.list(String[]::new, String::valueOf),
-            Integer[].class, OptionParsers.list(Integer[]::new, Integer::parseInt)
+            String[].class, OptionParsers.list(String::valueOf, String[]::new),
+            Integer[].class, OptionParsers.list(Integer::parseInt, Integer[]::new)
     );
 
     // 对外的 API 接口
     public static <T> T parse(Class<T> optionsClass, String... args) {
-        return new Args<T>(optionsClass, PARSERS).parse(args);
+        //return new Args<T>(optionsClass, PARSERS).parse(args);
         //return parse(optionsClass, PARSERS, args);
+        return new OptionClass<T>(optionsClass).getT(args);
     }
+
+    static class OptionClass<T> {
+        private Class<T> optionsClass;
+
+        public OptionClass(Class<T> optionsClass) {
+            this.optionsClass = optionsClass;
+        }
+
+        private T getT(String[] args) {
+            try {
+                List<String> arguments = Arrays.asList(args);
+
+                Constructor<?> constructor = this.optionsClass.getDeclaredConstructors()[0];
+
+                Object[] values = Arrays.stream(constructor.getParameters()).map(it -> parseOption(arguments, it)).toArray();
+
+                return (T) constructor.newInstance(values);
+            } catch (IllegalOptionException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
 
     private Class<T> optionsClass;
     private Map<Class<?>, OptionParser> parsers;
@@ -48,13 +74,13 @@ public class Args<T> {
         }
     }
 
-    private Object parseOption(List<String> arguments, Parameter parameter) {
+    private static Object parseOption(List<String> arguments, Parameter parameter) {
         if (!parameter.isAnnotationPresent(Option.class))
             throw new IllegalOptionException(parameter.getName());
         Option option = parameter.getAnnotation(Option.class);
-        if (!parsers.containsKey(parameter.getType())) {
+        if (!PARSERS.containsKey(parameter.getType())) {
             throw new UnsupportedOptionTypeException(option.value(), parameter.getType());
         }
-        return parsers.get(parameter.getType()).parse(arguments, option);
+        return PARSERS.get(parameter.getType()).parse(arguments, option);
     }
 }
