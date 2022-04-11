@@ -3,8 +3,12 @@ package geektime.tdd.args;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
+import java.util.function.Function;
 
+import static geektime.tdd.args.ArgsMap.toMap;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ArgsMapTest {
     // option without value, -b
@@ -37,7 +41,7 @@ public class ArgsMapTest {
     // multi options
     @Test
     public void should_split_args_to_map() {
-        Map<String, String[]> args = ArgsMap.toMap("-b", "-p", "8080", "-d", "/usr/logs");
+        Map<String, String[]> args = toMap("-b", "-p", "8080", "-d", "/usr/logs");
         assertEquals(3, args.size());
         assertArrayEquals(new String[]{}, args.get("b"));
         assertArrayEquals(new String[]{"8080"}, args.get("p"));
@@ -55,15 +59,29 @@ public class ArgsMapTest {
 
     @Test
     public void should_parse_bool_option() {
-        ArgsMap<BoolOption> args = new ArgsMap<>(BoolOption.class, Map.of(boolean.class, ArgsMapTest::parseBool));
+        Function<String[], Map<String, String[]>> optionParser = mock(Function.class);
+        when(optionParser.apply(new String[]{"-l"})).thenReturn(Map.of("l", new String[0]));
+
+        ArgsMap<BoolOption> args = new ArgsMap<>(BoolOption.class, Map.of(boolean.class, ArgsMapTest::parseBool), optionParser);
         BoolOption option = args.parse("-l");
+        assertTrue(option.logging);
+
+        args = new ArgsMap<>(BoolOption.class, Map.of(boolean.class, ArgsMapTest::parseBool), ArgsMap::toMap);
+        option = args.parse("-l");
         assertTrue(option.logging);
     }
 
     @Test
     public void should_parse_int_option() {
-        ArgsMap<IntOption> args = new ArgsMap<>(IntOption.class, Map.of(int.class, ArgsMapTest::parseInt));
+        Function<String[], Map<String, String[]>> optionParser = mock(Function.class);
+        when(optionParser.apply(new String[]{"-p", "8080"})).thenReturn(Map.of("p", new String[]{"8080"}));
+
+        ArgsMap<IntOption> args = new ArgsMap<>(IntOption.class, Map.of(int.class, ArgsMapTest::parseInt), optionParser);
         IntOption option = args.parse("-p", "8080");
+        assertEquals(8080, option.port);
+
+        args = new ArgsMap<>(IntOption.class, Map.of(int.class, ArgsMapTest::parseInt), ArgsMap::toMap);
+        option = args.parse("-p", "8080");
         assertEquals(8080, option.port);
     }
 

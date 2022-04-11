@@ -6,6 +6,7 @@ import geektime.tdd.args.Exceptions.UnsupportedOptionTypeException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
 import java.util.*;
+import java.util.function.Function;
 
 public class ArgsMap<T> {
     public static Map<String, String[]> toMap(String... args) {
@@ -29,15 +30,18 @@ public class ArgsMap<T> {
 
     private Class<T> optionsClass;
     private Map<Class<?>, OptionMapParser> parsers;
+    private Function<String[], Map<String, String[]>> optionParser;
 
-    public ArgsMap(Class<T> optionsClass, Map<Class<?>, OptionMapParser> parsers) {
+    public ArgsMap(Class<T> optionsClass, Map<Class<?>, OptionMapParser> parsers, Function<String[], Map<String, String[]>> optionParser) {
         this.optionsClass = optionsClass;
         this.parsers = parsers;
+        this.optionParser = optionParser;
     }
 
     public T parse(String... args) {
         try {
-            Map<String, String[]> options = toMap(args);
+//            Map<String, String[]> options = toMap(args);
+            Map<String, String[]> options = optionParser.apply(args);
             Constructor<?> constructor = optionsClass.getDeclaredConstructors()[0];
             Object[] values = Arrays.stream(constructor.getParameters()).map(it -> parseOption(options, it)).toArray();
             return (T) constructor.newInstance(values);
