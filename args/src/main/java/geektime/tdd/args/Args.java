@@ -23,6 +23,7 @@ public class Args<T> {
     public static <T> T parse(Class<T> optionsClass, String... args) {
         return new Args<T>(optionsClass, PARSERS).parse(args);
 //        return parse(optionsClass, PARSERS, args);
+
     }
 
     private Class<T> optionsClass;
