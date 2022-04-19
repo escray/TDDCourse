@@ -28,5 +28,4 @@ public class ArgsOrigin {
             boolean.class, new BooleanOptionParser(),
             int.class, new IntOptionParser(),
             String.class, new StringOptionParser());
-
 }
