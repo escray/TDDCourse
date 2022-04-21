@@ -144,9 +144,9 @@ function string(defaultValue = '') {
     if (!args) {
       return defaultValue;
     }
-    if (args.length === 1) {
-      return args[0];
-    }
+    if (args.length > 1) throw 'too many values';
+    if (args.length < 1) throw 'too few values';
+    return args[0];
   }
 }
 
@@ -154,4 +154,5 @@ function parse(schema, args) {
   let options = {}
   for (let key of Object.keys(schema))
     options[key] = schema[key](args);
+  return options;
 }
