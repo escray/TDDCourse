@@ -1,0 +1,40 @@
+plugins {
+    id 'java'
+}
+
+group 'com.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    junitVersion = '5.8.2'
+}
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    implementation('jakarta.enterprise:jakarta.enterprise.cdi-api:3.0.1')
+    implementation('org.hsqldb:hsqldb:2.6.1')
+    implementation('org.mockito:mockito-core:4.4.0')
+    implementation('org.eclipse.persistence:org.eclipse.persistence.jpa:3.0.2')
+    implementation('jakarta.ws.rs:jakarta.ws.rs-api:3.0.0')
+    implementation('org.glassfish.jersey.inject:jersey-hk2:3.0.4')
+    implementation('org.glassfish.jersey.containers:jersey-container-jetty-http:3.0.4')
+    testImplementation('org.glassfish.jersey.test-framework:jersey-test-framework-core:3.0.4')
+    testImplementation('org.glassfish.jersey.containers:jersey-container-grizzly2-http:3.0.4')
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+}
+
+test {
+    useJUnitPlatform()
+}
