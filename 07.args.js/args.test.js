@@ -129,24 +129,19 @@ function bool(defaultValue = false) {
 }
 
 function int(defaultValue = 0) {
-  return function (args) {
-    if (!args) {
-      return defaultValue;
-    }
-    if (args.length > 1) throw 'too many values';
-    if (args.length < 1) throw 'too few values';
-    return parseInt(args[0]);
-  }
+  return unary(defaultValue, parseInt);
 }
 
 function string(defaultValue = '') {
+  return unary(defaultValue, (args) => args);
+}
+
+function unary(defaultValue, parser) {
   return function (args) {
-    if (!args) {
-      return defaultValue;
-    }
+    if (!args) return defaultValue;
     if (args.length > 1) throw 'too many values';
     if (args.length < 1) throw 'too few values';
-    return args[0];
+    return parser(args[0]);
   }
 }
 

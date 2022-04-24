@@ -1,0 +1,12 @@
+<beans>
+    <bean id="MovieLister" class="Martin.Fowler.MovieLister">
+        <property name="finder">
+            <ref local="MovieFinder"></ref>
+        </property>
+    </bean>
+    <bean id="MovieFinder" class="Martin.Fowler.ColonMovieFinder">
+        <property name="filename">
+            <value>movie1.txt</value>
+        </property>
+    </bean>
+</beans>
