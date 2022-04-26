@@ -1,5 +1,6 @@
 package geektime.tdd.di;
 
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -7,13 +8,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ContainerTest {
-    interface Component {};
-
-    static class ComponentWithDefaultConstructor implements Component {
-        public ComponentWithDefaultConstructor() {
-        }
-    }
-
     Context context;
 
     @BeforeEach
@@ -31,7 +25,7 @@ public class ContainerTest {
             assertSame(instance, context.get(Component.class));
         }
 
-        // TODO: actract class
+        // TODO: abstract class
         // TODO: interface
         @Nested
         public class ConstructorInjection {
@@ -45,10 +39,61 @@ public class ContainerTest {
             }
 
             // TODO: with dependencies
+            @Test
+            public void should_bind_type_to_a_class_with_inject_constructor() {
+                context.bind(Component.class, ComponentWithInjectConstructor.class);
+                Dependency dependency = new Dependency() {
+
+                };
+                context.bind(Dependency.class, dependency);
+
+                Component instance = context.get(Component.class);
+                assertNotNull(instance);
+                assertSame(dependency, ((ComponentWithInjectConstructor) instance).getDependency());
+            }
 
             // TODO: A -> B -> C
+            @Test
+            public void should_bind_type_to_a_class_with_transitive_dependencies() {
+                context.bind(Component.class, ComponentWithInjectConstructor.class);
+                context.bind(Dependency.class, DependencyWithInjectConstructor.class);
+                context.bind(String.class, "indirect dependency");
 
-            // TODO: error
+                Component instance = context.get(Component.class);
+                assertNotNull(instance);
+
+                Dependency dependency = ((ComponentWithInjectConstructor)instance).getDependency();
+                assertNotNull(dependency);
+
+                assertEquals("indirect dependency", ((DependencyWithInjectConstructor)dependency).getDependency());
+            }
+
+            // sad path, error condition
+            // TODO: multi inject constructors
+            @Test
+            public void should_throw_exception_if_multi_inject_constructor_provided() {
+                // method 1
+                assertThrows(IllegalComponentException.class, () -> {
+                    context.bind(Component.class, ComponentWithMultiInjectConstructors.class);
+                });
+                // method 2
+//                context.bind(Component.class, ComponentWithMultiInjectConstructors.class);
+//                assertThrows(IllegalComponentException.class, () -> {
+//                    context.get(Component.class);
+//                });
+            }
+
+            // TODO: no default constructor and inject constructor
+            @Test
+            public void should_throw_exception_if_no_inject_nor_default_constructor_provider() {
+                assertThrows(IllegalComponentException.class, () -> {
+                    context.bind(Component.class, ComponentWithNoInjectConstructorNorDefaultConstructor.class);
+
+                });
+            }
+
+            // TODO: dependencies not exist
+
         }
 
         @Nested
@@ -72,3 +117,4 @@ public class ContainerTest {
 
     }
 }
+
