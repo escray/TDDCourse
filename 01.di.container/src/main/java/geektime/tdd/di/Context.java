@@ -52,7 +52,6 @@ public class Context {
                 throw new RuntimeException(e);
             }
         });
-
     }
 
     public <Type> Type get(Class<Type> type) {
