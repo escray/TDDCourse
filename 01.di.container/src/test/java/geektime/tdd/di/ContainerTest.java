@@ -29,7 +29,7 @@ public class ContainerTest {
         // TODO: interface
         @Nested
         public class ConstructorInjection {
-            // TODO: No args constructor
+            // DONE: No args constructor
             @Test
             public void should_bind_type_to_a_class_with_default_constructor() {
                 context.bind(Component.class, ComponentWithDefaultConstructor.class);
@@ -38,7 +38,7 @@ public class ContainerTest {
                 assertTrue(instance instanceof ComponentWithDefaultConstructor);
             }
 
-            // TODO: with dependencies
+            // DONE: with dependencies
             @Test
             public void should_bind_type_to_a_class_with_inject_constructor() {
                 context.bind(Component.class, ComponentWithInjectConstructor.class);
@@ -52,7 +52,7 @@ public class ContainerTest {
                 assertSame(dependency, ((ComponentWithInjectConstructor) instance).getDependency());
             }
 
-            // TODO: A -> B -> C
+            // DONE: A -> B -> C
             @Test
             public void should_bind_type_to_a_class_with_transitive_dependencies() {
                 context.bind(Component.class, ComponentWithInjectConstructor.class);
@@ -69,26 +69,24 @@ public class ContainerTest {
             }
 
             // sad path, error condition
-            // TODO: multi inject constructors
+            // DONE: multi inject constructors
             @Test
             public void should_throw_exception_if_multi_inject_constructor_provided() {
-                // method 1
                 assertThrows(IllegalComponentException.class, () -> {
                     context.bind(Component.class, ComponentWithMultiInjectConstructors.class);
                 });
-                // method 2
+
 //                context.bind(Component.class, ComponentWithMultiInjectConstructors.class);
 //                assertThrows(IllegalComponentException.class, () -> {
 //                    context.get(Component.class);
 //                });
             }
 
-            // TODO: no default constructor and inject constructor
+            // DONE: no default constructor and inject constructor
             @Test
             public void should_throw_exception_if_no_inject_nor_default_constructor_provider() {
                 assertThrows(IllegalComponentException.class, () -> {
                     context.bind(Component.class, ComponentWithNoInjectConstructorNorDefaultConstructor.class);
-
                 });
             }
 
