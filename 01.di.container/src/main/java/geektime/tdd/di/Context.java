@@ -3,13 +3,14 @@ package geektime.tdd.di;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
 
@@ -27,7 +28,7 @@ public class Context {
 
             try {
                 Object[] dependencies = stream(injectConstructor.getParameters())
-                        .map(p -> get(p.getType()))
+                        .map(p -> get(p.getType()).orElseThrow(DependencyNotFoundException::new))
                         .toArray(Object[]::new);
                 return injectConstructor.newInstance(dependencies);
             } catch ( InvocationTargetException | InstantiationException | IllegalAccessException  e) {
@@ -52,7 +53,7 @@ public class Context {
         });
     }
 
-    public <Type> Type get(Class<Type> type) {
-        return (Type)providers.get(type).get();
+    public <Type> Optional<Type> get(Class<Type> type) {
+        return Optional.ofNullable(providers.get(type)).map(provider -> (Type)provider.get());
     }
 }
