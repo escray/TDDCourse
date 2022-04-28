@@ -1,5 +1,6 @@
 package geektime.tdd.di;
 
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -96,13 +97,20 @@ public class ContainerTest {
             }
 
             // TODO: dependencies not exist
-
-
             @Test
             public void should_throw_exception_if_dependency_not_found() {
                 context.bind(Component.class, ComponentWithInjectConstructor.class);
 
                 assertThrows(DependencyNotFoundException.class, () -> context.get(Component.class).get());
+            }
+
+            @Test
+            public void should_throw_exception_if_cyclic_dependencies_found() {
+                context.bind(Component.class, ComponentWithInjectConstructor.class);
+                context.bind(Dependency.class, DependencyDependedOnComponent.class);
+
+                assertThrows(CyclicDependenciesFound.class, () -> context.get(Component.class));
+
             }
         }
 
@@ -125,6 +133,15 @@ public class ContainerTest {
     @Nested
     public class LifecycleManagement {
 
+    }
+}
+
+class DependencyDependedOnComponent implements Dependency {
+    private Component component;
+
+    @Inject
+    public DependencyDependedOnComponent(Component component) {
+        this.component = component;
     }
 }
 
