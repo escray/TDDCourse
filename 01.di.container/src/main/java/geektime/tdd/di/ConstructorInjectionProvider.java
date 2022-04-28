@@ -23,7 +23,7 @@ class ConstructorInjectionProvider<T> implements Provider<T> {
         try {
             constructive = true;
             Object[] dependencies = stream(injectConstructor.getParameters())
-                    .map(p -> context.get(p.getType()).orElseThrow(DependencyNotFoundException::new))
+                    .map(p -> context.get(p.getType()).orElseThrow(() -> new DependencyNotFoundException(p.getType())))
                     .toArray(Object[]::new);
             return injectConstructor.newInstance(dependencies);
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {

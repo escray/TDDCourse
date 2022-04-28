@@ -33,7 +33,6 @@ public class ContainerTest {
 
         @Test
         public void should_return_empty_if_component_not_defined() {
-            assertThrows(DependencyNotFoundException.class, () -> context.get(Component.class).orElseThrow(DependencyNotFoundException::new));
             Optional<Component> component = context.get(Component.class);
             assertTrue(component.isEmpty());
         }
@@ -101,7 +100,9 @@ public class ContainerTest {
             public void should_throw_exception_if_dependency_not_found() {
                 context.bind(Component.class, ComponentWithInjectConstructor.class);
 
-                assertThrows(DependencyNotFoundException.class, () -> context.get(Component.class).get());
+                DependencyNotFoundException exception = assertThrows(DependencyNotFoundException.class, () -> context.get(Component.class).get());
+
+                assertEquals(Dependency.class, exception.getDependency());
             }
 
             @Test
