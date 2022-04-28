@@ -4,7 +4,6 @@ import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,24 +21,11 @@ public class Context {
     public <Type, Implementation extends Type>
     void bind(Class<Type> type, Class<Implementation> implementation) {
         Constructor<Implementation> injectConstructor = getInjectConstructor(implementation);
-        providers.put(type, getTypeProvider(injectConstructor));
-    }
-
-    private <Type, Implementation extends Type> Provider<Type> getTypeProvider(Constructor<Implementation> injectConstructor) {
         // target: new XXX(injectConstructor)
-        return () -> getImplementation(injectConstructor);
+        // return () -> getImplementation(injectConstructor);
+        providers.put(type, new ConstructorInjectionProvider(this, injectConstructor));
     }
 
-    private <Type> Type getImplementation(Constructor<Type> injectConstructor) {
-        try {
-            Object[] dependencies = stream(injectConstructor.getParameters())
-                    .map(p -> get(p.getType()).orElseThrow(DependencyNotFoundException::new))
-                    .toArray(Object[]::new);
-            return injectConstructor.newInstance(dependencies);
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     private <Type> Constructor<Type> getInjectConstructor(Class<Type> implementation) {
         List<Constructor<?>> injectConstructors = stream(implementation.getConstructors())
