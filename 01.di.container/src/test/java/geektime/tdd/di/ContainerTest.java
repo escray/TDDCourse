@@ -112,6 +112,16 @@ public class ContainerTest {
                 assertThrows(CyclicDependenciesFound.class, () -> context.get(Component.class));
 
             }
+
+            // A -> B -> C -> A
+            @Test
+            public void should_throw_exception_if_transitive_cyclic_dependencies() {
+                context.bind(Component.class, ComponentWithInjectConstructor.class);
+                context.bind(Dependency.class, DependencyDependedOnAnotherDependency.class);
+                context.bind(AnotherDependency.class, AnotherDependencyDependedOnComponent.class);
+
+                assertThrows(CyclicDependenciesFound.class, () -> context.get(Component.class));
+            }
         }
 
         @Nested
@@ -132,7 +142,5 @@ public class ContainerTest {
 
     @Nested
     public class LifecycleManagement {
-
     }
 }
-
