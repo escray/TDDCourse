@@ -30,7 +30,6 @@ public class ContainerTest {
         // TODO: abstract class
         // TODO: interface
 
-
         @Test
         public void should_return_empty_if_component_not_defined() {
             Optional<Component> component = context.get(Component.class);
@@ -51,10 +50,9 @@ public class ContainerTest {
             // DONE: with dependencies
             @Test
             public void should_bind_type_to_a_class_with_inject_constructor() {
-                context.bind(Component.class, ComponentWithInjectConstructor.class);
-                Dependency dependency = new Dependency() {
+                Dependency dependency = new Dependency() {};
 
-                };
+                context.bind(Component.class, ComponentWithInjectConstructor.class);
                 context.bind(Dependency.class, dependency);
 
                 Component instance = context.get(Component.class).get();
@@ -82,27 +80,36 @@ public class ContainerTest {
             // DONE: multi inject constructors
             @Test
             public void should_throw_exception_if_multi_inject_constructor_provided() {
-                assertThrows(IllegalComponentException.class, () -> {
-                    context.bind(Component.class, ComponentWithMultiInjectConstructors.class);
-                });
+                assertThrows(IllegalComponentException.class,
+                        () -> context.bind(Component.class, ComponentWithMultiInjectConstructors.class));
             }
 
             // DONE: no default constructor and inject constructor
             @Test
             public void should_throw_exception_if_no_inject_nor_default_constructor_provider() {
-                assertThrows(IllegalComponentException.class, () -> {
-                    context.bind(Component.class, ComponentWithNoInjectConstructorNorDefaultConstructor.class);
-                });
+                assertThrows(IllegalComponentException.class,
+                        () -> context.bind(Component.class, ComponentWithNoInjectConstructorNorDefaultConstructor.class));
             }
 
             // TODO: dependencies not exist
             @Test
             public void should_throw_exception_if_dependency_not_found() {
                 context.bind(Component.class, ComponentWithInjectConstructor.class);
+                assertThrows(DependencyNotFoundException.class, () -> context.get(Component.class));
 
                 DependencyNotFoundException exception = assertThrows(DependencyNotFoundException.class, () -> context.get(Component.class).get());
-
                 assertEquals(Dependency.class, exception.getDependency());
+//                assertEquals(Component.class, exception.getComponent());
+            }
+
+            @Test
+            public void should_throw_exception_if_transitive_dependency_not_found() {
+                context.bind(Component.class, ComponentWithInjectConstructor.class);
+                context.bind(Dependency.class, DependencyWithInjectConstructor.class);
+
+                DependencyNotFoundException exception = assertThrows(DependencyNotFoundException.class, () -> context.get(Component.class).get());
+                assertEquals(String.class, exception.getDependency());
+//                assertEquals(Dependency.class, exception.getComponent());
             }
 
             @Test
@@ -111,12 +118,11 @@ public class ContainerTest {
                 context.bind(Dependency.class, DependencyDependedOnComponent.class);
 
                 assertThrows(CyclicDependenciesFound.class, () -> context.get(Component.class));
-
             }
 
             // A -> B -> C -> A
             @Test
-            public void should_throw_exception_if_transitive_cyclic_dependencies() {
+            public void should_throw_exception_if_transitive_cyclic_dependencies_found() {
                 context.bind(Component.class, ComponentWithInjectConstructor.class);
                 context.bind(Dependency.class, DependencyDependedOnAnotherDependency.class);
                 context.bind(AnotherDependency.class, AnotherDependencyDependedOnComponent.class);

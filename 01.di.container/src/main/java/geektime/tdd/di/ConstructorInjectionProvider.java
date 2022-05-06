@@ -9,11 +9,18 @@ import static java.util.Arrays.stream;
 
 class ConstructorInjectionProvider<T> implements Provider<T> {
     private final Context context;
+    private Class<?> componentType;
     private Constructor<T> injectConstructor;
     private boolean constructive = false;
 
     public ConstructorInjectionProvider(Context context, Constructor<T> injectConstructor) {
         this.context = context;
+        this.injectConstructor = injectConstructor;
+    }
+
+    public ConstructorInjectionProvider(Context context, Class<?> componentType, Constructor<T> injectConstructor) {
+        this.context = context;
+        this.componentType = componentType;
         this.injectConstructor = injectConstructor;
     }
 
@@ -23,8 +30,11 @@ class ConstructorInjectionProvider<T> implements Provider<T> {
         try {
             constructive = true;
             Object[] dependencies = stream(injectConstructor.getParameters())
-                    .map(p -> context.get(p.getType()).orElseThrow(() -> new DependencyNotFoundException(p.getType())))
+                    .map(p -> context.get(p.getType())
+                            .orElseThrow(() -> new DependencyNotFoundException(p.getType())))
                     .toArray(Object[]::new);
+            //.orElseThrow(DependencyNotFoundException::new))
+
             return injectConstructor.newInstance(dependencies);
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
