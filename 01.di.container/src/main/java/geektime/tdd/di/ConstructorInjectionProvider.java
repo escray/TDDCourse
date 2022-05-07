@@ -13,11 +13,6 @@ class ConstructorInjectionProvider<T> implements Provider<T> {
     private Constructor<T> injectConstructor;
     private boolean constructive = false;
 
-    public ConstructorInjectionProvider(Context context, Constructor<T> injectConstructor) {
-        this.context = context;
-        this.injectConstructor = injectConstructor;
-    }
-
     public ConstructorInjectionProvider(Context context, Class<?> componentType, Constructor<T> injectConstructor) {
         this.context = context;
         this.componentType = componentType;
@@ -31,7 +26,7 @@ class ConstructorInjectionProvider<T> implements Provider<T> {
             constructive = true;
             Object[] dependencies = stream(injectConstructor.getParameters())
                     .map(p -> context.get(p.getType())
-                            .orElseThrow(() -> new DependencyNotFoundException(p.getType())))
+                            .orElseThrow(() -> new DependencyNotFoundException(componentType, p.getType())))
                     .toArray(Object[]::new);
             //.orElseThrow(DependencyNotFoundException::new))
 
