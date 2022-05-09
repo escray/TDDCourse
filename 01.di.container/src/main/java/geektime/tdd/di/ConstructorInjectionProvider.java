@@ -21,7 +21,7 @@ class ConstructorInjectionProvider<T> implements Provider<T> {
 
     @Override
     public T get() {
-        if (constructive) throw new CyclicDependenciesFound();
+        if (constructive) throw new CyclicDependenciesFoundException(componentType);
         try {
             constructive = true;
             Object[] dependencies = stream(injectConstructor.getParameters())
@@ -31,6 +31,8 @@ class ConstructorInjectionProvider<T> implements Provider<T> {
             //.orElseThrow(DependencyNotFoundException::new))
 
             return injectConstructor.newInstance(dependencies);
+        } catch (CyclicDependenciesFoundException e) {
+            throw new CyclicDependenciesFoundException(componentType, e);
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         } finally {

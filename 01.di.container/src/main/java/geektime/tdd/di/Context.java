@@ -27,7 +27,6 @@ public class Context {
         providers.put(type, new ConstructorInjectionProvider(this, type, injectConstructor));
     }
 
-
     private <Type> Constructor<Type> getInjectConstructor(Class<Type> implementation) {
         List<Constructor<?>> injectConstructors = stream(implementation.getConstructors())
                 .filter(c -> c.isAnnotationPresent(Inject.class)).collect(Collectors.toList());
@@ -47,5 +46,4 @@ public class Context {
     public <Type> Optional<Type> get(Class<Type> type) {
         return Optional.ofNullable(providers.get(type)).map(provider -> (Type)provider.get());
     }
-
 }

@@ -11,6 +11,7 @@ repositories {
 }
 
 dependencies {
+    implementation("org.mockito:mockito-core:4.5.1")
     implementation("jakarta.inject:jakarta.inject-api:2.0.1")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
