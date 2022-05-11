@@ -7,13 +7,13 @@ import java.lang.reflect.InvocationTargetException;
 
 import static java.util.Arrays.stream;
 
-class ConstructorInjectionProvider<T> implements Provider<T> {
-    private final Context context;
+class ConstructorInjectionProvider<T> implements Provider<T>, ContextConfig.ComponentProvider<T> {
+    private final ContextConfig context;
     private Class<?> componentType;
     private Constructor<T> injectConstructor;
     private boolean constructive = false;
 
-    public ConstructorInjectionProvider(Context context, Class<?> componentType, Constructor<T> injectConstructor) {
+    public ConstructorInjectionProvider(ContextConfig context, Class<?> componentType, Constructor<T> injectConstructor) {
         this.context = context;
         this.componentType = componentType;
         this.injectConstructor = injectConstructor;
@@ -21,6 +21,11 @@ class ConstructorInjectionProvider<T> implements Provider<T> {
 
     @Override
     public T get() {
+        return get(context.getContext());
+    }
+
+    @Override
+    public T get(Context context) {
         if (constructive) throw new CyclicDependenciesFoundException(componentType);
         try {
             constructive = true;
