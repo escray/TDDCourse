@@ -1,33 +1,33 @@
 package geektime.tdd.di;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 
 public class ContextConfig {
-    private final Map<Class<?>, Provider<?>> providers = new HashMap<>();
-    private Map<Class<?>, ComponentProvider<?>> componentProviders = new HashMap<>();
+    private Map<Class<?>, ComponentProvider<?>> providers = new HashMap<>();
+    private Map<Class<?>, List<Class<?>>> dependencies = new HashMap<>();
 
     public <Type> void bind(Class<Type> type, Type instance) {
-        providers.put(type, (Provider<Type>) () -> instance);
-        componentProviders.put(type, context -> instance);
+        providers.put(type, context -> instance);
+        dependencies.put(type, asList());
     }
 
     public <Type, Implementation extends Type>
     void bind(Class<Type> type, Class<Implementation> implementation) {
         Constructor<Implementation> injectConstructor = getInjectConstructor(implementation);
-        // target: new XXX(injectConstructor)
-        // return () -> getImplementation(injectConstructor);
+
         providers.put(type, new ConstructorInjectionProvider(this, type, injectConstructor));
-        componentProviders.put(type, new ConstructorInjectionProvider(this, type, injectConstructor));
+        dependencies.put(type, stream(injectConstructor.getParameters()).map(Parameter::getType).collect(Collectors.toList()));
     }
 
     private <Type> Constructor<Type> getInjectConstructor(Class<Type> implementation) {
@@ -47,10 +47,18 @@ public class ContextConfig {
     }
 
     public Context getContext() {
+        // check dependencies
+        for (Class<?> component : dependencies.keySet()) {
+            for (Class<?> dependency : dependencies.get(component)) {
+                if (!dependencies.containsKey(dependency)) {
+                    throw new DependencyNotFoundException(component, dependency);
+                }
+            }
+        }
         return new Context() {
             @Override
             public <Type> Optional<Type> get(Class<Type> type) {
-                return Optional.ofNullable(componentProviders.get(type)).map(provider -> (Type) provider.get(this));
+                return Optional.ofNullable(providers.get(type)).map(provider -> (Type) provider.get(this));
             }
         };
     }

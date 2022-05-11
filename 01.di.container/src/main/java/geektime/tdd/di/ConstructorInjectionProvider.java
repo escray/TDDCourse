@@ -7,7 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import static java.util.Arrays.stream;
 
-class ConstructorInjectionProvider<T> implements Provider<T>, ContextConfig.ComponentProvider<T> {
+class ConstructorInjectionProvider<T> implements ContextConfig.ComponentProvider<T> {
     private final ContextConfig context;
     private Class<?> componentType;
     private Constructor<T> injectConstructor;
@@ -17,11 +17,6 @@ class ConstructorInjectionProvider<T> implements Provider<T>, ContextConfig.Comp
         this.context = context;
         this.componentType = componentType;
         this.injectConstructor = injectConstructor;
-    }
-
-    @Override
-    public T get() {
-        return get(context.getContext());
     }
 
     @Override

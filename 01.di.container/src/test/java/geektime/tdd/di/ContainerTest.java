@@ -34,15 +34,6 @@ public class ContainerTest {
         // TODO: abstract class
         // TODO: interface
 
-
-//        @Test
-//        public void should_bind() {
-//            context.bind(Component.class, ComponentWithInjectConstructor.class);
-//
-//            Container container = context.getContainer();
-//            container.get(Component.class);
-//        }
-
         @Test
         public void should_return_empty_if_component_not_defined() {
             Optional<Component> component = config.getContext().get(Component.class);
@@ -108,7 +99,7 @@ public class ContainerTest {
             @Test
             public void should_throw_exception_if_dependency_not_found() {
                 config.bind(Component.class, ComponentWithInjectConstructor.class);
-                assertThrows(DependencyNotFoundException.class, () -> config.getContext().get(Component.class));
+                assertThrows(DependencyNotFoundException.class, () -> config.getContext());
 
                 DependencyNotFoundException exception = assertThrows(DependencyNotFoundException.class, () -> config.getContext().get(Component.class).get());
                 assertEquals(Dependency.class, exception.getDependency());
