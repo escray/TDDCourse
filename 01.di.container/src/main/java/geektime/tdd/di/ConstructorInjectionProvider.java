@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.stream;
 
 class ConstructorInjectionProvider<T> implements ComponentProvider<T> {
-    private Constructor<T> injectConstructor;
+    private final Constructor<T> injectConstructor;
 
     public ConstructorInjectionProvider(Class<T> component) {
         this.injectConstructor = getInjectConstructor(component);

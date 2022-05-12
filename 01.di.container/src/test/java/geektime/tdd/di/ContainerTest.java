@@ -41,8 +41,10 @@ public class ContainerTest {
         }
 
         @Nested
+        // 构造函数注入
         public class ConstructorInjection {
             // DONE: No args constructor
+            // 无依赖的组件应该通过默认构造函数生成组件实例
             @Test
             public void should_bind_type_to_a_class_with_default_constructor() {
                 config.bind(Component.class, ComponentWithDefaultConstructor.class);
@@ -52,6 +54,7 @@ public class ContainerTest {
             }
 
             // DONE: with dependencies
+            // 有依赖的组件，通过 Inject 标注的构造函数生成组件实例
             @Test
             public void should_bind_type_to_a_class_with_inject_constructor() {
                 Dependency dependency = new Dependency() {};
@@ -65,6 +68,7 @@ public class ContainerTest {
             }
 
             // DONE: A -> B -> C
+            // 如果所依赖的组件也存在依赖，那么需要对所依赖的组件也完成依赖注入
             @Test
             public void should_bind_type_to_a_class_with_transitive_dependencies() {
                 config.bind(Component.class, ComponentWithInjectConstructor.class);
@@ -82,6 +86,7 @@ public class ContainerTest {
 
             // sad path, error condition
             // DONE: multi inject constructors
+            // 如果组件有多于一个 Inject 标注的构造函数，则抛出异常
             @Test
             public void should_throw_exception_if_multi_inject_constructor_provided() {
                 assertThrows(IllegalComponentException.class,
@@ -89,6 +94,7 @@ public class ContainerTest {
             }
 
             // DONE: no default constructor and inject constructor
+            // 如果组件没有 Inject 标注的构造函数，也没有默认构造函数（新增任务）
             @Test
             public void should_throw_exception_if_no_inject_nor_default_constructor_provider() {
                 assertThrows(IllegalComponentException.class,
@@ -96,6 +102,7 @@ public class ContainerTest {
             }
 
             // TODO: dependencies not exist
+            // 如果组件需要的依赖不存在，则抛出异常
             @Test
             public void should_throw_exception_if_dependency_not_found() {
                 config.bind(Component.class, ComponentWithInjectConstructor.class);
@@ -116,6 +123,7 @@ public class ContainerTest {
                 assertEquals(Dependency.class, exception.getComponent());
             }
 
+            // 如果组件间存在循环依赖，则抛出异常
             @Test
             public void should_throw_exception_if_cyclic_dependencies_found() {
                 config.bind(Component.class, ComponentWithInjectConstructor.class);
@@ -149,6 +157,15 @@ public class ContainerTest {
 
         @Nested
         public class FieldInjection {
+
+            // TODO: inject field
+
+            // TODO: throw exception if dependency not found
+
+            // TODO: throw exception if field is final
+
+            // TODO: throw exception if cyclic dependency
+
 
         }
 

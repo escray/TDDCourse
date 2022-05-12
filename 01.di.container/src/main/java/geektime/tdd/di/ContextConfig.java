@@ -3,7 +3,7 @@ package geektime.tdd.di;
 import java.util.*;
 
 public class ContextConfig {
-    private Map<Class<?>, ComponentProvider<?>> providers = new HashMap<>();
+    private final Map<Class<?>, ComponentProvider<?>> providers = new HashMap<>();
 
     public <Type> void bind(Class<Type> type, Type instance) {
         providers.put(type, new ComponentProvider<Type>() {
