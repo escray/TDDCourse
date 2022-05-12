@@ -2,12 +2,11 @@ package geektime.tdd.di;
 
 import jakarta.inject.Inject;
 
+import java.awt.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
@@ -49,11 +48,7 @@ public class ContextConfig {
     public Context getContext() {
         // check dependencies
         for (Class<?> component : dependencies.keySet()) {
-            for (Class<?> dependency : dependencies.get(component)) {
-                if (!dependencies.containsKey(dependency)) {
-                    throw new DependencyNotFoundException(component, dependency);
-                }
-            }
+            checkDependencies(component, new Stack<>());
         }
         return new Context() {
             @Override
@@ -61,5 +56,19 @@ public class ContextConfig {
                 return Optional.ofNullable(providers.get(type)).map(provider -> (Type) provider.get(this));
             }
         };
+    }
+
+    private void checkDependencies(Class<?> component, Stack<Class<?>> visiting) {
+        for (Class<?> dependency : dependencies.get(component)) {
+            if (!dependencies.containsKey(dependency)) {
+                throw new DependencyNotFoundException(component, dependency);
+            }
+            if (visiting.contains(dependency)) {
+                throw new CyclicDependenciesFoundException(visiting);
+            }
+            visiting.push(dependency);
+            checkDependencies(dependency, visiting);
+            visiting.pop();
+        }
     }
 }

@@ -1,7 +1,9 @@
 package geektime.tdd.di;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 
 public class CyclicDependenciesFoundException extends RuntimeException {
     private Set<Class<?>> components = new HashSet<>();
@@ -13,6 +15,10 @@ public class CyclicDependenciesFoundException extends RuntimeException {
     public CyclicDependenciesFoundException(Class<?> componentType, CyclicDependenciesFoundException e) {
         components.add(componentType);
         components.addAll(e.components);
+    }
+
+    public CyclicDependenciesFoundException(List<Class<?>> visiting) {
+        components.addAll(visiting);
     }
 
     public Class<?>[] getComponents() {
