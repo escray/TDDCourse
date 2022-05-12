@@ -4,7 +4,6 @@ import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
 
 import java.util.Arrays;
@@ -163,7 +162,7 @@ public class ContainerTest {
         @Nested
         public class FieldInjection {
 
-            class ComponentWithFieldInjection {
+            static class ComponentWithFieldInjection {
                 @Inject
                 Dependency dependency;
 //                public Dependency getDependency() {
@@ -171,14 +170,27 @@ public class ContainerTest {
 //                }
             }
 
+            static class SubclassWithFieldInjection extends ComponentWithFieldInjection {}
+
             // TODO: inject field
             @Test
             public void should_inject_dependency_via_field() {
                 Dependency dependency = new Dependency() {};
                 config.bind(Dependency.class, dependency);
                 config.bind(ComponentWithFieldInjection.class, ComponentWithFieldInjection.class);
+
                 ComponentWithFieldInjection component = config.getContext().get(ComponentWithFieldInjection.class).get();
 
+                assertSame(dependency, component.dependency);
+            }
+
+            @Test
+            public void should_inject_dependency_via_superclass_inject_field() {
+                Dependency dependency = new Dependency() {};
+                config.bind(Dependency.class, dependency);
+                config.bind(SubclassWithFieldInjection.class, SubclassWithFieldInjection.class);
+
+                SubclassWithFieldInjection component = config.getContext().get(SubclassWithFieldInjection.class).get();
                 assertSame(dependency, component.dependency);
             }
 
@@ -191,17 +203,13 @@ public class ContainerTest {
 
                 ConstructorInjectionProvider<ComponentWithFieldInjection> provider = new ConstructorInjectionProvider<>(ComponentWithFieldInjection.class);
                 ComponentWithFieldInjection component = provider.get(context);
+
                 assertSame(dependency, component.dependency);
             }
 
             // TODO: throw exception if field is final
 
-            // TODO: throw exception if dependency not found
-            @Test
-            public void should_throw_exception_when_field_dependency_missing() {
-                config.bind(ComponentWithFieldInjection.class, ComponentWithFieldInjection.class);
-                assertThrows(DependencyNotFoundException.class, () -> config.getContext());
-            }
+            // TODO: provider dependency information for field injection
 
             @Test
             public void should_include_field_dependency_in_dependencies() {
@@ -211,19 +219,25 @@ public class ContainerTest {
                         provider.getDependencies().toArray(Class<?>[]::new));
             }
 
-            // TODO: throw exception if cyclic dependency
+            @Test
+            public void should_throw_exception_when_field_dependency_missing() {
+                config.bind(ComponentWithFieldInjection.class, ComponentWithFieldInjection.class);
+                assertThrows(DependencyNotFoundException.class, () -> config.getContext());
+            }
+
+
             class DependencyWithFieldInjection implements Dependency {
                 @Inject
                 ComponentWithFieldInjection component;
             }
 
-            @Test
-            public void should_throw_exception_when_field_has_cyclic_dependencies() {
-                config.bind(ComponentWithFieldInjection.class, ComponentWithFieldInjection.class);
-                config.bind(Dependency.class, DependencyWithFieldInjection.class);
-
-                assertThrows(CyclicDependenciesFoundException.class, () -> config.getContext());
-            }
+//            @Test
+//            public void should_throw_exception_when_field_has_cyclic_dependencies() {
+//                config.bind(ComponentWithFieldInjection.class, ComponentWithFieldInjection.class);
+//                config.bind(Dependency.class, DependencyWithFieldInjection.class);
+//
+//                assertThrows(CyclicDependenciesFoundException.class, () -> config.getContext());
+//            }
 
             @Test
             public void should_include_field_dependency_in_dependencies_() {
