@@ -1,20 +1,16 @@
 package geektime.tdd.di;
 
-import jakarta.inject.Provider;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import static java.util.Arrays.stream;
 
-class ConstructorInjectionProvider<T> implements ContextConfig.ComponentProvider<T> {
-    private final ContextConfig context;
+class ConstructorInjectionProvider<T> implements ComponentProvider<T> {
     private Class<?> componentType;
     private Constructor<T> injectConstructor;
     private boolean constructive = false;
 
-    public ConstructorInjectionProvider(ContextConfig context, Class<?> componentType, Constructor<T> injectConstructor) {
-        this.context = context;
+    public ConstructorInjectionProvider(Class<?> componentType, Constructor<T> injectConstructor) {
         this.componentType = componentType;
         this.injectConstructor = injectConstructor;
     }
@@ -28,8 +24,6 @@ class ConstructorInjectionProvider<T> implements ContextConfig.ComponentProvider
                     .map(p -> context.get(p.getType())
                             .orElseThrow(() -> new DependencyNotFoundException(componentType, p.getType())))
                     .toArray(Object[]::new);
-            //.orElseThrow(DependencyNotFoundException::new))
-
             return injectConstructor.newInstance(dependencies);
         } catch (CyclicDependenciesFoundException e) {
             throw new CyclicDependenciesFoundException(componentType, e);
