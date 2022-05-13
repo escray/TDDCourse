@@ -39,6 +39,51 @@ public class ContainerTest {
         }
 
         @Nested
+        public class DependencyCheck {
+            // TODO: dependencies not exist
+            // 如果组件需要的依赖不存在，则抛出异常
+            @Test
+            public void should_throw_exception_if_dependency_not_found() {
+                config.bind(Component.class, ComponentWithInjectConstructor.class);
+
+                DependencyNotFoundException exception = assertThrows(DependencyNotFoundException.class, () -> config.getContext());
+                assertEquals(Dependency.class, exception.getDependency());
+                assertEquals(Component.class, exception.getComponent());
+            }
+
+            // 如果组件间存在循环依赖，则抛出异常
+            @Test
+            public void should_throw_exception_if_cyclic_dependencies_found() {
+                config.bind(Component.class, ComponentWithInjectConstructor.class);
+                config.bind(Dependency.class, DependencyDependedOnComponent.class);
+
+                CyclicDependenciesFoundException exception = assertThrows(CyclicDependenciesFoundException.class, () -> config.getContext());
+
+                Set<Class<?>> classes = Sets.newSet(exception.getComponents());
+                assertEquals(2, classes.size());
+                assertTrue(classes.contains(Component.class));
+                assertTrue(classes.contains(Dependency.class));
+            }
+
+            // A -> B -> C -> A
+            @Test
+            public void should_throw_exception_if_transitive_cyclic_dependencies_found() {
+                config.bind(Component.class, ComponentWithInjectConstructor.class);
+                config.bind(Dependency.class, DependencyDependedOnAnotherDependency.class);
+                config.bind(AnotherDependency.class, AnotherDependencyDependedOnComponent.class);
+
+                CyclicDependenciesFoundException exception = assertThrows(CyclicDependenciesFoundException.class, () -> config.getContext());
+
+                List<Class<?>> components = Arrays.asList(exception.getComponents());
+
+                assertEquals(3, components.size());
+                assertTrue(components.contains(Component.class));
+                assertTrue(components.contains(Dependency.class));
+                assertTrue(components.contains(AnotherDependency.class));
+            }
+        }
+
+        @Nested
         // 构造函数注入
         public class ConstructorInjection {
             // DONE: No args constructor
@@ -110,8 +155,6 @@ public class ContainerTest {
             @Test
             public void should_throw_exception_if_multi_inject_constructor_provided() {
                 assertThrows(IllegalComponentException.class,
-                        () -> config.bind(Component.class, ComponentWithMultiInjectConstructors.class));
-                assertThrows(IllegalComponentException.class,
                         () -> new ConstructorInjectionProvider<>(ComponentWithMultiInjectConstructors.class));
             }
 
@@ -120,62 +163,14 @@ public class ContainerTest {
             @Test
             public void should_throw_exception_if_no_inject_nor_default_constructor_provider() {
                 assertThrows(IllegalComponentException.class,
-                        () -> config.bind(Component.class, ComponentWithNoInjectConstructorNorDefaultConstructor.class));
-                assertThrows(IllegalComponentException.class,
                         () -> new ConstructorInjectionProvider<>(ComponentWithNoInjectConstructorNorDefaultConstructor.class));
             }
 
-            // TODO: dependencies not exist
-            // 如果组件需要的依赖不存在，则抛出异常
             @Test
-            public void should_throw_exception_if_dependency_not_found() {
-                config.bind(Component.class, ComponentWithInjectConstructor.class);
-
-                DependencyNotFoundException exception = assertThrows(DependencyNotFoundException.class, () -> config.getContext());
-                assertEquals(Dependency.class, exception.getDependency());
-                assertEquals(Component.class, exception.getComponent());
-            }
-
-            @Test
-            public void should_throw_exception_if_transitive_dependency_not_found() {
-                // pre delete
-//                config.bind(Component.class, ComponentWithInjectConstructor.class);
-                config.bind(Dependency.class, DependencyWithInjectConstructor.class);
-
-                DependencyNotFoundException exception = assertThrows(DependencyNotFoundException.class, () -> config.getContext());
-                assertEquals(String.class, exception.getDependency());
-                assertEquals(Dependency.class, exception.getComponent());
-            }
-
-            // 如果组件间存在循环依赖，则抛出异常
-            @Test
-            public void should_throw_exception_if_cyclic_dependencies_found() {
-                config.bind(Component.class, ComponentWithInjectConstructor.class);
-                config.bind(Dependency.class, DependencyDependedOnComponent.class);
-
-                CyclicDependenciesFoundException exception = assertThrows(CyclicDependenciesFoundException.class, () -> config.getContext());
-
-                Set<Class<?>> classes = Sets.newSet(exception.getComponents());
-                assertEquals(2, classes.size());
-                assertTrue(classes.contains(Component.class));
-                assertTrue(classes.contains(Dependency.class));
-            }
-
-            // A -> B -> C -> A
-            @Test
-            public void should_throw_exception_if_transitive_cyclic_dependencies_found() {
-                config.bind(Component.class, ComponentWithInjectConstructor.class);
-                config.bind(Dependency.class, DependencyDependedOnAnotherDependency.class);
-                config.bind(AnotherDependency.class, AnotherDependencyDependedOnComponent.class);
-
-                CyclicDependenciesFoundException exception = assertThrows(CyclicDependenciesFoundException.class, () -> config.getContext());
-
-                List<Class<?>> components = Arrays.asList(exception.getComponents());
-
-                assertEquals(3, components.size());
-                assertTrue(components.contains(Component.class));
-                assertTrue(components.contains(Dependency.class));
-                assertTrue(components.contains(AnotherDependency.class));
+            public void should_include_dependency_from_inject_constructor() {
+                ConstructorInjectionProvider<ComponentWithInjectConstructor> provider =
+                        new ConstructorInjectionProvider<>(ComponentWithInjectConstructor.class);
+                assertArrayEquals(new Class<?>[]{Dependency.class}, provider.getDependencies().toArray(Class<?>[]::new));
             }
         }
 
@@ -354,7 +349,6 @@ public class ContainerTest {
 
     @Nested
     public class DependenciesSelection {
-
     }
 
     @Nested
