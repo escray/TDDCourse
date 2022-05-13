@@ -111,6 +111,8 @@ public class ContainerTest {
             public void should_throw_exception_if_multi_inject_constructor_provided() {
                 assertThrows(IllegalComponentException.class,
                         () -> config.bind(Component.class, ComponentWithMultiInjectConstructors.class));
+                assertThrows(IllegalComponentException.class,
+                        () -> new ConstructorInjectionProvider<>(ComponentWithMultiInjectConstructors.class));
             }
 
             // DONE: no default constructor and inject constructor
@@ -119,6 +121,8 @@ public class ContainerTest {
             public void should_throw_exception_if_no_inject_nor_default_constructor_provider() {
                 assertThrows(IllegalComponentException.class,
                         () -> config.bind(Component.class, ComponentWithNoInjectConstructorNorDefaultConstructor.class));
+                assertThrows(IllegalComponentException.class,
+                        () -> new ConstructorInjectionProvider<>(ComponentWithNoInjectConstructorNorDefaultConstructor.class));
             }
 
             // TODO: dependencies not exist
@@ -134,7 +138,8 @@ public class ContainerTest {
 
             @Test
             public void should_throw_exception_if_transitive_dependency_not_found() {
-                config.bind(Component.class, ComponentWithInjectConstructor.class);
+                // pre delete
+//                config.bind(Component.class, ComponentWithInjectConstructor.class);
                 config.bind(Dependency.class, DependencyWithInjectConstructor.class);
 
                 DependencyNotFoundException exception = assertThrows(DependencyNotFoundException.class, () -> config.getContext());
