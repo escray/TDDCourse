@@ -26,12 +26,14 @@ public class ContextConfig {
 
     public Context getContext() {
         // check dependencies
-        providers.keySet().forEach(component -> checkDependencies(component, new Stack<>()));
+        providers.keySet()
+                .forEach(component -> checkDependencies(component, new Stack<>()));
 
         return new Context() {
             @Override
             public <Type> Optional<Type> get(Class<Type> type) {
-                return Optional.ofNullable(providers.get(type)).map(provider -> (Type) provider.get(this));
+                return Optional.ofNullable(providers.get(type))
+                        .map(provider -> (Type) provider.get(this));
             }
         };
     }

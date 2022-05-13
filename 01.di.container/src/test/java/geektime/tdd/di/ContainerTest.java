@@ -32,9 +32,6 @@ public class ContainerTest {
             assertSame(instance, context.get(Component.class).get());
         }
 
-        // TODO: abstract class
-        // TODO: interface
-
         @Test
         public void should_return_empty_if_component_not_defined() {
             Optional<Component> component = config.getContext().get(Component.class);
@@ -44,6 +41,9 @@ public class ContainerTest {
         @Nested
         // 构造函数注入
         public class ConstructorInjection {
+            // TODO: abstract class
+            // TODO: interface
+
             // DONE: No args constructor
             // 无依赖的组件应该通过默认构造函数生成组件实例
             @Test
@@ -107,7 +107,6 @@ public class ContainerTest {
             @Test
             public void should_throw_exception_if_dependency_not_found() {
                 config.bind(Component.class, ComponentWithInjectConstructor.class);
-                assertThrows(DependencyNotFoundException.class, () -> config.getContext());
 
                 DependencyNotFoundException exception = assertThrows(DependencyNotFoundException.class, () -> config.getContext());
                 assertEquals(Dependency.class, exception.getDependency());
@@ -162,9 +161,6 @@ public class ContainerTest {
             static class ComponentWithFieldInjection {
                 @Inject
                 Dependency dependency;
-//                public Dependency getDependency() {
-//                    return dependency;
-//                }
             }
 
             static class SubclassWithFieldInjection extends ComponentWithFieldInjection {}
@@ -263,6 +259,14 @@ public class ContainerTest {
                 }
             }
 
+            @Test
+            public void should_inject_dependencies_via_inject_method_from_superclass() {
+                config.bind(SubclassWithInjectMethod.class, SubclassWithInjectMethod.class);
+                SubclassWithInjectMethod component = config.getContext().get(SubclassWithInjectMethod.class).get();
+                assertEquals(1, component.superCalled);
+                assertEquals(2, component.subCalled);
+            }
+
             static class SubclassOverrideSuperClassWithInject extends SuperClassWithInjectMethod {
                 @Inject
                 void install() {
@@ -290,18 +294,11 @@ public class ContainerTest {
                 assertEquals(0, component.superCalled);
             }
 
-            @Test
-            public void should_inject_dependencies_via_inject_method_from_superclass() {
-                config.bind(SubclassWithInjectMethod.class, SubclassWithInjectMethod.class);
-                SubclassWithInjectMethod component = config.getContext().get(SubclassWithInjectMethod.class).get();
-                assertEquals(1, component.superCalled);
-                assertEquals(2, component.subCalled);
-            }
-
             // TODO: include dependencies from inject method
             @Test
             public void should_include_dependencies_from_inject_method() {
-                ConstructorInjectionProvider<InjectMethodWithDependency> provider = new ConstructorInjectionProvider<>(InjectMethodWithDependency.class);
+                ConstructorInjectionProvider<InjectMethodWithDependency> provider
+                        = new ConstructorInjectionProvider<>(InjectMethodWithDependency.class);
                 assertArrayEquals(new Class<?>[]{Dependency.class},
                         provider.getDependencies().toArray(Class<?>[]::new));
             }
