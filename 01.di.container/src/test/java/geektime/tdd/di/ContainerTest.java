@@ -41,9 +41,6 @@ public class ContainerTest {
         @Nested
         // 构造函数注入
         public class ConstructorInjection {
-            // TODO: abstract class
-            // TODO: interface
-
             // DONE: No args constructor
             // 无依赖的组件应该通过默认构造函数生成组件实例
             @Test
@@ -86,6 +83,28 @@ public class ContainerTest {
             }
 
             // sad path, error condition
+
+            abstract class AbstractComponent implements Component {
+                @Inject
+                public AbstractComponent() {
+
+                }
+            }
+
+            // TODO: abstract class
+            @Test
+            public void should_throw_exception_if_component_is_abstract() {
+                assertThrows(IllegalComponentException.class,
+                        () -> new ConstructorInjectionProvider<>(AbstractComponent.class));
+            }
+
+            // TODO: interface
+            @Test
+            public void should_throw_exception_if_component_is_interface() {
+                assertThrows(IllegalComponentException.class,
+                        () -> new ConstructorInjectionProvider<>(Component.class));
+            }
+
             // DONE: multi inject constructors
             // 如果组件有多于一个 Inject 标注的构造函数，则抛出异常
             @Test
@@ -188,6 +207,16 @@ public class ContainerTest {
             }
 
             // TODO: throw exception if field is final
+            static class FinalInjectField {
+                @Inject
+                final Dependency dependency = null;
+            }
+
+            @Test
+            public void should_throw_exception_if_inject_field_is_final() {
+                assertThrows(IllegalComponentException.class,
+                        () -> new ConstructorInjectionProvider<>(FinalInjectField.class));
+            }
 
             // TODO: provider dependency information for field injection
             @Test
@@ -304,7 +333,17 @@ public class ContainerTest {
             }
 
             // TODO: throw exception if type parameter defined
+            static class InjectMethodWithTypeParameter {
+                @Inject
+                <T> void install() {
+                }
+            }
 
+            @Test
+            public void should_throw_exception_if_inject_method_has_type_parameter() {
+                assertThrows(IllegalComponentException.class,
+                        () -> new ConstructorInjectionProvider<>(InjectMethodWithTypeParameter.class));
+            }
         }
     }
 
