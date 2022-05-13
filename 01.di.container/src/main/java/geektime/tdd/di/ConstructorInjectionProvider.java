@@ -14,10 +14,12 @@ import static java.util.stream.Stream.concat;
 class ConstructorInjectionProvider<T> implements ComponentProvider<T> {
     private final Constructor<T> injectConstructor;
     private final List<Field> injectFields;
-    private List<Method> injectMethods;
+    private final List<Method> injectMethods;
 
     public ConstructorInjectionProvider(Class<T> component) {
-        if (Modifier.isAbstract(component.getModifiers())) throw new IllegalComponentException();
+        if (Modifier.isAbstract(component.getModifiers())) {
+            throw new IllegalComponentException();
+        }
 
         this.injectConstructor = getInjectConstructor(component);
         this.injectFields = getInjectFields(component);
@@ -60,8 +62,8 @@ class ConstructorInjectionProvider<T> implements ComponentProvider<T> {
                                 .map(Parameter::getType),
                         injectFields.stream().map(Field::getType)),
                 injectMethods.stream()
-                        .flatMap(m -> stream(m.getParameterTypes()))
-        ).toList();
+                        .flatMap(m -> stream(m.getParameterTypes())))
+                .toList();
     }
 
     private static <T> List<Field> getInjectFields(Class<T> component) {
@@ -102,7 +104,9 @@ class ConstructorInjectionProvider<T> implements ComponentProvider<T> {
                 stream(implementation.getConstructors())
                 .filter(c -> c.isAnnotationPresent(Inject.class)).toList();
 
-        if (injectConstructors.size() > 1) throw new IllegalComponentException();
+        if (injectConstructors.size() > 1) {
+            throw new IllegalComponentException();
+        }
 
         return (Constructor<Type>) injectConstructors.stream()
                 .findFirst().orElseGet(() -> {
