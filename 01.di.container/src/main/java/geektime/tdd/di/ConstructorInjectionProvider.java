@@ -4,6 +4,8 @@ import jakarta.inject.Inject;
 
 import java.lang.reflect.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -56,7 +58,9 @@ class ConstructorInjectionProvider<T> implements ComponentProvider<T> {
         List<Field> injectFields = new ArrayList<>();
         Class<?> current = component;
         while (current != Object.class) {
-            injectFields.addAll(stream(current.getDeclaredFields()).filter(f-> f.isAnnotationPresent(Inject.class)).toList());
+            injectFields.addAll(stream(current.getDeclaredFields())
+                    .filter(f -> f.isAnnotationPresent(Inject.class))
+                    .toList());
             current = current.getSuperclass();
         }
         return injectFields;
@@ -66,11 +70,20 @@ class ConstructorInjectionProvider<T> implements ComponentProvider<T> {
         List<Method> injectMethods = new ArrayList<>();
         Class<?> current = component;
         while (current != Object.class) {
-            injectMethods.addAll(stream(current.getDeclaredMethods())
-                    .filter(m -> m.isAnnotationPresent(Inject.class))
-                    .toList());
+            injectMethods.addAll(
+                    stream(current.getDeclaredMethods())
+                            .filter(m -> m.isAnnotationPresent(Inject.class))
+                            .filter(m -> injectMethods.stream()
+                                    .noneMatch(o -> o.getName().equals(m.getName()) &&
+                                            Arrays.equals(o.getParameterTypes(), m.getParameterTypes())))
+                            .filter(m -> stream(component.getDeclaredMethods())
+                                    .filter(n -> !n.isAnnotationPresent(Inject.class))
+                                    .noneMatch(o -> o.getName().equals(m.getName()) &&
+                                            Arrays.equals(o.getParameterTypes(), m.getParameterTypes())))
+                            .toList());
             current = current.getSuperclass();
         }
+        Collections.reverse(injectMethods);
         return injectMethods;
     }
 
