@@ -4,19 +4,29 @@ import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 @Nested
 public class InjectionTest {
 
-    ContextConfig config;
-    Dependency dependency = new Dependency() {};
+    private ContextConfig config;
+    // private Dependency dependency = new Dependency() {};
+    private Dependency dependency = Mockito.mock(Dependency.class);
+
+    private Context context = Mockito.mock(Context.class);
 
     @BeforeEach
     public void setup() {
         config = new ContextConfig();
         config.bind(Dependency.class, dependency);
+
+        when(context.get(eq(Dependency.class))).thenReturn(Optional.of(dependency));
     }
 
     @Nested
@@ -27,7 +37,7 @@ public class InjectionTest {
         @Test
         public void should_bind_type_to_a_class_with_default_constructor() {
 
-            Component instance = getComponent(Component.class, ComponentWithDefaultConstructor.class);
+            Component instance = getComponent(ComponentWithDefaultConstructor.class);
 
             assertNotNull(instance);
             assertTrue(instance instanceof ComponentWithDefaultConstructor);
@@ -38,9 +48,7 @@ public class InjectionTest {
         @Test
         public void should_bind_type_to_a_class_with_inject_constructor() {
 
-
-
-            Component instance = getComponent(Component.class, ComponentWithInjectConstructor.class);
+            Component instance = getComponent(ComponentWithInjectConstructor.class);
 
             assertNotNull(instance);
             assertSame(dependency, ((ComponentWithInjectConstructor) instance).getDependency());
@@ -54,7 +62,10 @@ public class InjectionTest {
             config.bind(Dependency.class, DependencyWithInjectConstructor.class);
             config.bind(String.class, "indirect dependency");
 
-            Component instance = getComponent(Component.class, ComponentWithInjectConstructor.class);
+            when(context.get(eq(Dependency.class)))
+                    .thenReturn(Optional.of(new DependencyWithInjectConstructor("indirect dependency")));
+
+            Component instance = getComponent(ComponentWithInjectConstructor.class);
 
             assertNotNull(instance);
 
@@ -111,9 +122,8 @@ public class InjectionTest {
         }
     }
 
-    private <T, R extends T> T getComponent(Class<T> type, Class<R> implementation) {
-        config.bind(type, implementation);
-        return config.getContext().get(type).get();
+    private <T, R extends T> T getComponent(Class<R> implementation) {
+        return new ConstructorInjectionProvider<>(implementation).get(context);
     }
 
     @Nested
@@ -130,13 +140,13 @@ public class InjectionTest {
         // TODO: inject field
         @Test
         public void should_inject_dependency_via_field() {
-            ComponentWithFieldInjection component = getComponent(ComponentWithFieldInjection.class, ComponentWithFieldInjection.class);
+            ComponentWithFieldInjection component = getComponent(ComponentWithFieldInjection.class);
             assertSame(dependency, component.dependency);
         }
 
         @Test
         public void should_inject_dependency_via_superclass_inject_field() {
-            SubclassWithFieldInjection component = getComponent(SubclassWithFieldInjection.class, SubclassWithFieldInjection.class);
+            SubclassWithFieldInjection component = getComponent(SubclassWithFieldInjection.class);
             assertSame(dependency, component.dependency);
         }
 
@@ -177,7 +187,7 @@ public class InjectionTest {
 
         @Test
         public void should_call_inject_method_even_if_no_dependency_declared() {
-            InjectMethodWithNoDependency component = getComponent(InjectMethodWithNoDependency.class, InjectMethodWithNoDependency.class);
+            InjectMethodWithNoDependency component = getComponent(InjectMethodWithNoDependency.class);
             assertTrue(component.called);
         }
 
@@ -194,7 +204,7 @@ public class InjectionTest {
 
         @Test
         public void should_inject_dependency_via_inject_method() {
-            InjectMethodWithDependency component = getComponent(InjectMethodWithDependency.class, InjectMethodWithDependency.class);
+            InjectMethodWithDependency component = getComponent(InjectMethodWithDependency.class);
             assertSame(dependency, component.dependency);
         }
 
@@ -219,7 +229,7 @@ public class InjectionTest {
 
         @Test
         public void should_inject_dependencies_via_inject_method_from_superclass() {
-            SubclassWithInjectMethod component = getComponent(SubclassWithInjectMethod.class, SubclassWithInjectMethod.class);
+            SubclassWithInjectMethod component = getComponent(SubclassWithInjectMethod.class);
 
             assertEquals(1, component.superCalled);
             assertEquals(2, component.subCalled);
@@ -234,7 +244,7 @@ public class InjectionTest {
 
         @Test
         public void should_only_call_once_if_subclass_override_inject_method_with_inject() {
-            SubclassOverrideSuperClassWithInject component = getComponent(SubclassOverrideSuperClassWithInject.class, SubclassOverrideSuperClassWithInject.class);
+            SubclassOverrideSuperClassWithInject component = getComponent(SubclassOverrideSuperClassWithInject.class);
             assertEquals(1, component.superCalled);
         }
 
@@ -246,7 +256,7 @@ public class InjectionTest {
 
         @Test
         public void should_not_call_inject_method_if_override_with_no_inject() {
-            SubclassOverrideSuperClassWithNoInject component = getComponent(SubclassOverrideSuperClassWithNoInject.class, SubclassOverrideSuperClassWithNoInject.class);
+            SubclassOverrideSuperClassWithNoInject component = getComponent(SubclassOverrideSuperClassWithNoInject.class);
 
             assertEquals(0, component.superCalled);
         }
