@@ -52,25 +52,19 @@ public class InjectionTest {
             public void should_include_dependency_from_inject_constructor() {
                 ConstructorInjectionProvider<InjectConstructor> provider =
                         new ConstructorInjectionProvider<>(InjectConstructor.class);
-                assertArrayEquals(new Class<?>[]{Dependency.class}, provider.getDependencies().toArray(Class<?>[]::new));
-            }
-        }
-
-        // sad path, error condition
-        abstract class AbstractComponent implements Component {
-            @Inject
-            public AbstractComponent() {
-
+                assertArrayEquals(new Class<?>[]{Dependency.class},
+                        provider.getDependencies().toArray(Class<?>[]::new));
             }
         }
 
         @Nested
         class IllegalInjectConstructors {
+            // sad path, error condition
             // TODO: abstract class
             @Test
             public void should_throw_exception_if_component_is_abstract() {
                 assertThrows(IllegalComponentException.class,
-                        () -> new ConstructorInjectionProvider<>(ConstructorInjection.AbstractComponent.class));
+                        () -> new ConstructorInjectionProvider<>(AbstractComponent.class));
             }
 
             // TODO: interface
@@ -85,7 +79,7 @@ public class InjectionTest {
             @Test
             public void should_throw_exception_if_multi_inject_constructor_provided() {
                 assertThrows(IllegalComponentException.class,
-                        () -> new ConstructorInjectionProvider<>(ComponentWithMultiInjectConstructors.class));
+                        () -> new ConstructorInjectionProvider<>(MultiInjectConstructors.class));
             }
 
             // DONE: no default constructor and inject constructor
@@ -93,7 +87,7 @@ public class InjectionTest {
             @Test
             public void should_throw_exception_if_no_inject_nor_default_constructor_provider() {
                 assertThrows(IllegalComponentException.class,
-                        () -> new ConstructorInjectionProvider<>(ComponentWithNoInjectConstructorNorDefaultConstructor.class));
+                        () -> new ConstructorInjectionProvider<>(NoInjectNorDefaultConstructor.class));
             }
         }
     }
@@ -165,7 +159,6 @@ public class InjectionTest {
             }
 
             // TODO: inject method with no dependencies will be called
-
             @Test
             public void should_call_inject_method_even_if_no_dependency_declared() {
                 InjectMethodWithNoDependency component = new ConstructorInjectionProvider<>(InjectMethodWithNoDependency.class).get(context);
@@ -254,6 +247,7 @@ public class InjectionTest {
 
         @Nested
         class IllegalInjectMethods {
+
             // TODO: throw exception if type parameter defined
             static class InjectMethodWithTypeParameter {
                 @Inject
