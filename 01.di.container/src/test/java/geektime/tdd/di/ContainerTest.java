@@ -1,6 +1,5 @@
 package geektime.tdd.di;
 
-import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -45,7 +44,7 @@ public class ContainerTest {
             // 如果组件需要的依赖不存在，则抛出异常
             @Test
             public void should_throw_exception_if_dependency_not_found() {
-                config.bind(Component.class, ComponentWithInjectConstructor.class);
+                config.bind(Component.class, InjectConstructor.class);
 
                 DependencyNotFoundException exception = assertThrows(DependencyNotFoundException.class, () -> config.getContext());
                 assertEquals(Dependency.class, exception.getDependency());
@@ -55,7 +54,7 @@ public class ContainerTest {
             // 如果组件间存在循环依赖，则抛出异常
             @Test
             public void should_throw_exception_if_cyclic_dependencies_found() {
-                config.bind(Component.class, ComponentWithInjectConstructor.class);
+                config.bind(Component.class, InjectConstructor.class);
                 config.bind(Dependency.class, DependencyDependedOnComponent.class);
 
                 CyclicDependenciesFoundException exception = assertThrows(CyclicDependenciesFoundException.class, () -> config.getContext());
@@ -69,7 +68,7 @@ public class ContainerTest {
             // A -> B -> C -> A
             @Test
             public void should_throw_exception_if_transitive_cyclic_dependencies_found() {
-                config.bind(Component.class, ComponentWithInjectConstructor.class);
+                config.bind(Component.class, InjectConstructor.class);
                 config.bind(Dependency.class, DependencyDependedOnAnotherDependency.class);
                 config.bind(AnotherDependency.class, AnotherDependencyDependedOnComponent.class);
 

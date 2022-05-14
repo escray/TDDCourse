@@ -2,11 +2,11 @@ package geektime.tdd.di;
 
 import jakarta.inject.Inject;
 
-class ComponentWithInjectConstructor implements Component {
+class InjectConstructor implements Component {
     private Dependency dependency;
 
     @Inject
-    public ComponentWithInjectConstructor(Dependency dependency) {
+    public InjectConstructor(Dependency dependency) {
         this.dependency = dependency;
     }
 
