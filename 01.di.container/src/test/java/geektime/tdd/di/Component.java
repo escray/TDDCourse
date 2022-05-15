@@ -1,5 +1,7 @@
 package geektime.tdd.di;
 
 interface Component {
-    Dependency dependency();
+    default Dependency dependency() {
+        return null;
+    };
 }

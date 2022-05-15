@@ -10,9 +10,4 @@ class MultiInjectConstructors implements Component {
     @Inject
     public MultiInjectConstructors(String name) {
     }
-
-    @Override
-    public Dependency dependency() {
-        return null;
-    }
 }

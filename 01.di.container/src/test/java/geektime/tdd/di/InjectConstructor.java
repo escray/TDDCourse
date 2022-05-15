@@ -13,9 +13,4 @@ class InjectConstructor implements Component {
     public Dependency getDependency() {
         return dependency;
     }
-
-    @Override
-    public Dependency dependency() {
-        return dependency;
-    }
 }
