@@ -65,30 +65,20 @@ class InjectionProvider<T> implements ComponentProvider<T> {
         return traverse(component, function);
     }
 
-    private static <T> List<Field> traverse(Class<T> component, BiFunction<List<Field>, Class<?>, List<Field>> function) {
-        List<Field> injectFields = new ArrayList<>();
+    private static <T> List<T> traverse(Class<?> component, BiFunction<List<T>, Class<?>, List<T>> finder) {
+        List<T> members = new ArrayList<>();
         Class<?> current = component;
         while (current != Object.class) {
-            injectFields.addAll(function.apply(injectFields, current));
+            members.addAll(finder.apply(members, current));
             current = current.getSuperclass();
         }
-        return injectFields;
+        return members;
     }
 
     private static <T> List<Method> getInjectMethods(Class<T> component) {
         BiFunction<List<Method>, Class<?>, List<Method>> function = (methods, current) -> getC(component, methods, current);
-        List<Method> injectMethods = traverse1(component, function);
+        List<Method> injectMethods = traverse(component, function);
         Collections.reverse(injectMethods);
-        return injectMethods;
-    }
-
-    private static <T> List<Method> traverse1(Class<T> component, BiFunction<List<Method>, Class<?>, List<Method>> function) {
-        List<Method> injectMethods = new ArrayList<>();
-        Class<?> current = component;
-        while (current != Object.class) {
-            injectMethods.addAll(function.apply(injectMethods, current));
-            current = current.getSuperclass();
-        }
         return injectMethods;
     }
 
