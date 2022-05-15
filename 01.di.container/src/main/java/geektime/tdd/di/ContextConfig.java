@@ -11,11 +11,6 @@ public class ContextConfig {
             public Type get(Context context) {
                 return instance;
             }
-
-            @Override
-            public List<Class<?>> getDependencies() {
-                return List.of();
-            }
         });
     }
 
