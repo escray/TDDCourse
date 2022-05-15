@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Stream.concat;
@@ -37,9 +38,12 @@ class InjectionProvider<T> implements ComponentProvider<T> {
     @Override
     public T get(Context context) {
         try {
-            Object[] dependencies = stream(injectConstructor.getParameters())
-                    .map(p -> context.get(p.getType()).get())
+            Object[] dependencies = stream(injectConstructor.getParameterTypes())
+                    .map(t -> context.get(t).get())
                     .toArray(Object[]::new);
+//            Object[] dependencies = stream(injectConstructor.getParameters())
+//                    .map(p -> context.get(p.getType()).get())
+//                    .toArray(Object[]::new);
             T instance = injectConstructor.newInstance(dependencies);
             for (Field field : injectFields) {
                 field.set(instance, context.get(field.getType()).get());
@@ -70,9 +74,7 @@ class InjectionProvider<T> implements ComponentProvider<T> {
         List<Field> injectFields = new ArrayList<>();
         Class<?> current = component;
         while (current != Object.class) {
-            injectFields.addAll(stream(current.getDeclaredFields())
-                    .filter(f -> f.isAnnotationPresent(Inject.class))
-                    .toList());
+            injectFields.addAll(injectable(current.getDeclaredFields()).toList());
             current = current.getSuperclass();
         }
         return injectFields;
@@ -82,17 +84,10 @@ class InjectionProvider<T> implements ComponentProvider<T> {
         List<Method> injectMethods = new ArrayList<>();
         Class<?> current = component;
         while (current != Object.class) {
-            injectMethods.addAll(
-                    stream(current.getDeclaredMethods())
-                            .filter(m -> m.isAnnotationPresent(Inject.class))
-                            .filter(m -> injectMethods.stream()
-                                    .noneMatch(o -> o.getName().equals(m.getName()) &&
-                                            Arrays.equals(o.getParameterTypes(), m.getParameterTypes())))
-                            .filter(m -> stream(component.getDeclaredMethods())
-                                    .filter(n -> !n.isAnnotationPresent(Inject.class))
-                                    .noneMatch(o -> o.getName().equals(m.getName()) &&
-                                            Arrays.equals(o.getParameterTypes(), m.getParameterTypes())))
-                            .toList());
+            injectMethods.addAll(injectable(current.getDeclaredMethods())
+                    .filter(m -> isOverrideByInjectMethod(injectMethods, m))
+                    .filter(m -> isOverrideByNoInjectMethod(component, m))
+                    .toList());
             current = current.getSuperclass();
         }
         Collections.reverse(injectMethods);
@@ -101,8 +96,7 @@ class InjectionProvider<T> implements ComponentProvider<T> {
 
     private static <Type> Constructor<Type> getInjectConstructor(Class<Type> implementation) {
         List<Constructor<?>> injectConstructors =
-                stream(implementation.getConstructors())
-                .filter(c -> c.isAnnotationPresent(Inject.class)).toList();
+                injectable(implementation.getConstructors()).toList();
 
         if (injectConstructors.size() > 1) {
             throw new IllegalComponentException();
@@ -116,5 +110,25 @@ class InjectionProvider<T> implements ComponentProvider<T> {
                         throw new IllegalComponentException();
                     }
                 });
+    }
+
+    private static <T extends AnnotatedElement> Stream<T> injectable(T[] declaredFields) {
+        return stream(declaredFields)
+                .filter(f -> f.isAnnotationPresent(Inject.class));
+    }
+
+    private static boolean isOverride(Method o, Method m) {
+        return o.getName().equals(m.getName()) &&
+                Arrays.equals(o.getParameterTypes(), m.getParameterTypes());
+    }
+
+    private static <T> boolean isOverrideByNoInjectMethod(Class<T> component, Method m) {
+        return stream(component.getDeclaredMethods())
+                .filter(n -> !n.isAnnotationPresent(Inject.class))
+                .noneMatch(o -> isOverride(o, m));
+    }
+
+    private static boolean isOverrideByInjectMethod(List<Method> injectMethods, Method m) {
+        return injectMethods.stream().noneMatch(o -> isOverride(o, m));
     }
 }
