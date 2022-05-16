@@ -15,7 +15,6 @@ public class ContextConfig {
     }
 
     public Context getContext() {
-        // check dependencies
         providers.keySet()
                 .forEach(component -> checkDependencies(component, new Stack<>()));
 
