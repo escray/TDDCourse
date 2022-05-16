@@ -1,12 +1,15 @@
 package geektime.tdd.di;
 
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.internal.util.collections.Sets;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -91,6 +94,36 @@ public class ContextTest {
             Optional<Component> component = config.getContext().get(Component.class);
             assertTrue(component.isEmpty());
         }
+
+        // Context
+        // TODO: could get Provider<T> from context
+
+        @Test
+        public void should_retrieve_component_bind_type_as_provider() {
+            Component instance = new Component() {};
+            config.bind(Component.class, instance);
+
+            Context context = config.getContext();
+
+            // Type ->
+
+            ParameterizedType type = new TypeLiteral<Provider<Component>>() {}.getType();
+            assertEquals(Provider.class, type.getRawType());
+            assertEquals(Component.class, type.getActualTypeArguments()[0]);
+
+            Provider<Component> provider = (Provider<Component>) context.get(type).get();
+            assertSame(instance, provider.get());
+
+//            Optional<Provider> provider = context.get(Provider<Component>.class);
+//            assertSame(instance, provider.get());
+        }
+
+        static abstract class TypeLiteral<T> {
+            public ParameterizedType getType() {
+                return (ParameterizedType)((ParameterizedType)getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+            }
+        }
+
     }
 
     @Nested
@@ -199,7 +232,6 @@ public class ContextTest {
 
             }
         }
-
 
         // A -> B -> C -> A
         @ParameterizedTest(name = "indirect cyclic dependency between {0}, {1} and {2}")
