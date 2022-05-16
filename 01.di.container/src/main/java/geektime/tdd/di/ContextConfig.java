@@ -30,6 +30,9 @@ public class ContextConfig {
 
             @Override
             public Optional get(ParameterizedType type) {
+                if (type.getRawType() != Provider.class) {
+                    return Optional.empty();
+                }
                 Class<?> componentType = (Class<?>) type.getActualTypeArguments()[0];
                 return Optional.ofNullable(providers.get(componentType))
                         .map(provider -> (Provider<Object>) () -> provider.get(this));

@@ -1,26 +1,32 @@
 package geektime.tdd.di;
 
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @Nested
 public class InjectionTest {
-    private final Dependency dependency = Mockito.mock(Dependency.class);
-    private final Context context = Mockito.mock(Context.class);
+    private final Dependency dependency = mock(Dependency.class);
+    private Provider<Dependency> dependencyProvider = mock(Provider.class);
+    private final Context context = mock(Context.class);
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws NoSuchFieldException {
+        ParameterizedType providerType = (ParameterizedType) InjectionTest.class.getDeclaredField("dependencyProvider").getGenericType();
         when(context.get(eq(Dependency.class)))
                 .thenReturn(Optional.of(dependency));
+        when(context.get(eq(providerType))).thenReturn(Optional.of(dependencyProvider));
     }
 
     @Nested
@@ -54,6 +60,24 @@ public class InjectionTest {
                         new InjectionProvider<>(InjectConstructor.class);
                 assertArrayEquals(new Class<?>[]{Dependency.class},
                         provider.getDependencies().toArray(Class<?>[]::new));
+            }
+
+            // InjectionProvider
+            // TODO: support inject constructor
+            static class ProviderInjectConstructor {
+                Provider<Dependency> dependency;
+                @Inject
+                public ProviderInjectConstructor(Provider<Dependency> dependency) {
+                    this.dependency = dependency;
+                }
+            }
+
+            @Test
+            public void should_inject_provider_via_inject_constructor() {
+                ProviderInjectConstructor instance = new InjectionProvider<>(ProviderInjectConstructor.class).get(context);
+
+                assertNotNull(instance.dependency);
+                assertSame(dependencyProvider, instance.dependency);
             }
         }
 
@@ -90,10 +114,6 @@ public class InjectionTest {
                         () -> new InjectionProvider<>(NoInjectNorDefaultConstructor.class));
             }
         }
-
-        // InjectionProvider
-        // TODO: support inject constructor
-
     }
 
     @Nested
@@ -130,6 +150,18 @@ public class InjectionTest {
                 assertArrayEquals(new Class<?>[]{Dependency.class},
                         provider.getDependencies().toArray(Class<?>[]::new));
             }
+
+            // TODO: support inject field
+            static class ProviderInjectField {
+                @Inject
+                Provider<Dependency> dependency;
+            }
+
+            @Test
+            public void should_inject_provider_via_inject_field() {
+                ProviderInjectField instance = new InjectionProvider<>(ProviderInjectField.class).get(context);
+                assertSame(dependencyProvider, instance.dependency);
+            }
         }
 
         @Nested
@@ -146,9 +178,6 @@ public class InjectionTest {
                         () -> new InjectionProvider<>(FinalInjectField.class));
             }
         }
-
-        // TODO: support inject field
-
     }
 
     @Nested
@@ -182,7 +211,6 @@ public class InjectionTest {
             }
 
             // TODO: inject method with dependencies will be injected
-
             @Test
             public void should_inject_dependency_via_inject_method() {
                 InjectMethodWithDependency component = new InjectionProvider<>(InjectMethodWithDependency.class).get(context);
@@ -250,6 +278,22 @@ public class InjectionTest {
                 assertArrayEquals(new Class<?>[]{Dependency.class},
                         provider.getDependencies().toArray(Class<?>[]::new));
             }
+
+            // TODO: support inject method
+            static class ProviderInjectMethod {
+                Provider<Dependency> dependency;
+
+                @Inject
+                void install(Provider<Dependency> dependency) {
+                    this.dependency = dependency;
+                }
+            }
+
+            @Test
+            public void should_inject_provider_via_inject_constructor() {
+                ProviderInjectMethod instance = new InjectionProvider<>(ProviderInjectMethod.class).get(context);
+                assertSame(dependencyProvider, instance.dependency);
+            }
         }
 
         @Nested
@@ -268,7 +312,5 @@ public class InjectionTest {
                         () -> new InjectionProvider<>(InjectMethodWithTypeParameter.class));
             }
         }
-
-        // TODO: support inject method
     }
 }
