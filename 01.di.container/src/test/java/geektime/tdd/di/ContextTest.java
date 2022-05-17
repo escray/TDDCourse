@@ -149,13 +149,15 @@ public class ContextTest {
             assertEquals(Component.class, exception.getComponent());
         }
 
+        // DONE: provider in inject field
+        // DONE: provider in inject method
         public static Stream<Arguments> should_throw_exception_if_dependency_not_found_para() {
             return Stream.of(Arguments.of(Named.of("Inject Constructor", MissingDependencyConstructor.class)),
                     Arguments.of(Named.of("Inject Field", MissingDependencyField.class)),
-                    Arguments.of(Named.of("Inject Method", MissingDependencyMethod.class)));
-            // TODO: Arguments.of(Named.of("Provider in Inject Constructor", MissingDependencyProviderConstructor.class))
-            // TODO: provider in inject field
-            // TODO: provider in inject method
+                    Arguments.of(Named.of("Inject Method", MissingDependencyMethod.class)),
+                    Arguments.of(Named.of("Provider in Inject Constructor", MissingDependencyProviderConstructor.class)),
+                    Arguments.of(Named.of("Provider in Inject Field", MissingDependencyProviderField.class)),
+                    Arguments.of(Named.of("Provider in Inject Method", MissingDependencyProviderMethod.class)));
         }
 
         static class MissingDependencyConstructor implements Component {
@@ -181,6 +183,19 @@ public class ContextTest {
             public MissingDependencyProviderConstructor(Provider<Dependency> dependency) {
             }
         }
+
+        static class MissingDependencyProviderField implements Component {
+            @Inject
+            Provider<Dependency> dependency;
+        }
+
+        static class MissingDependencyProviderMethod implements Component {
+            @Inject
+            void install(Provider<Dependency> dependency) {
+            }
+        }
+
+
 
 
         // 如果组件间存在循环依赖，则抛出异常
