@@ -195,9 +195,6 @@ public class ContextTest {
             }
         }
 
-
-
-
         // 如果组件间存在循环依赖，则抛出异常
         @ParameterizedTest(name = "cyclic dependency between {0} and {1}")
         @MethodSource
@@ -338,6 +335,20 @@ public class ContextTest {
             void install(Component component) {
 
             }
+        }
+
+        static class CyclicDependencyProviderConstructor implements Dependency {
+            @Inject
+            public CyclicDependencyProviderConstructor(Provider<Component> component) {
+            }
+        }
+
+        @Test
+        public void should_not_throw_exception_if_syclic_dependency_with_provider() {
+            config.bind(Component.class, CyclicComponentInjectConstructor.class);
+            config.bind(Dependency.class, CyclicDependencyProviderConstructor.class);
+            Context context = config.getContext();
+            assertTrue(context.get(Component.class).isPresent());
         }
     }
 }
