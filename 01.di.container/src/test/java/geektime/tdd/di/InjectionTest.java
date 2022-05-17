@@ -66,7 +66,7 @@ public class InjectionTest {
 
             // DONE: include dependency type from inject constructor
             @Test
-            public void should_include_dependency_type_from_inject_constructor() {
+            public void should_include_provider_type_from_inject_constructor() {
                 InjectionProvider<ProviderInjectConstructor> provider = new InjectionProvider<>(ProviderInjectConstructor.class);
                 assertArrayEquals(new Type[]{dependencyProviderType}, provider.getDependencyTypes().toArray(Type[]::new));
             }
@@ -151,15 +151,20 @@ public class InjectionTest {
                 assertSame(dependency, component.dependency);
             }
 
-            // TODO: include dependency type from inject field
-
             // DONE provider dependency information for field injection
             @Test
-            public void should_include_dependency_from_field_dependencies() {
+            public void should_include_dependency_from_field_dependency() {
                 InjectionProvider<ComponentWithFieldInjection> provider =
                         new InjectionProvider<>(ComponentWithFieldInjection.class);
                 assertArrayEquals(new Class<?>[]{Dependency.class},
                         provider.getDependencies().toArray(Class<?>[]::new));
+            }
+
+            // DONE: include dependency type from inject field
+            @Test
+            public void should_include_provider_type_from_inject_field() {
+                InjectionProvider<ProviderInjectField> provider = new InjectionProvider<>(ProviderInjectField.class);
+                assertArrayEquals(new Type[]{dependencyProviderType}, provider.getDependencyTypes().toArray(Type[]::new));
             }
 
             // DONE: support inject field
@@ -228,8 +233,13 @@ public class InjectionTest {
                 assertSame(dependency, component.dependency);
             }
 
-            // TODO: include dependency type from inject method
+            // DONE: include dependency type from inject method
+            @Test
+            public void should_include_provider_type_from_inject_method() {
+                InjectionProvider<ProviderInjectMethod> provider = new InjectionProvider<>(ProviderInjectMethod.class);
+                assertArrayEquals(new Type[]{dependencyProviderType}, provider.getDependencyTypes().toArray(Type[]::new));
 
+            }
 
             // DONE: override inject method from superclass
             static class SuperClassWithInjectMethod {
