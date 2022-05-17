@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,13 +21,14 @@ public class InjectionTest {
     private final Dependency dependency = mock(Dependency.class);
     private Provider<Dependency> dependencyProvider = mock(Provider.class);
     private final Context context = mock(Context.class);
+    private ParameterizedType dependencyProviderType;
 
     @BeforeEach
     public void setup() throws NoSuchFieldException {
-        ParameterizedType providerType = (ParameterizedType) InjectionTest.class.getDeclaredField("dependencyProvider").getGenericType();
+        dependencyProviderType = (ParameterizedType) InjectionTest.class.getDeclaredField("dependencyProvider").getGenericType();
         when(context.get(eq(Dependency.class)))
                 .thenReturn(Optional.of(dependency));
-        when(context.get(eq(providerType))).thenReturn(Optional.of(dependencyProvider));
+        when(context.get(eq(dependencyProviderType))).thenReturn(Optional.of(dependencyProvider));
     }
 
     @Nested
@@ -62,8 +64,15 @@ public class InjectionTest {
                         provider.getDependencies().toArray(Class<?>[]::new));
             }
 
+            // DONE: include dependency type from inject constructor
+            @Test
+            public void should_include_dependency_type_from_inject_constructor() {
+                InjectionProvider<ProviderInjectConstructor> provider = new InjectionProvider<>(ProviderInjectConstructor.class);
+                assertArrayEquals(new Type[]{dependencyProviderType}, provider.getDependencyTypes().toArray(Type[]::new));
+            }
+
             // InjectionProvider
-            // TODO: support inject constructor
+            // DONE: support inject constructor
             static class ProviderInjectConstructor {
                 Provider<Dependency> dependency;
                 @Inject
@@ -84,14 +93,14 @@ public class InjectionTest {
         @Nested
         class IllegalInjectConstructors {
             // sad path, error condition
-            // TODO: abstract class
+            // DONE: abstract class
             @Test
             public void should_throw_exception_if_component_is_abstract() {
                 assertThrows(IllegalComponentException.class,
                         () -> new InjectionProvider<>(AbstractComponent.class));
             }
 
-            // TODO: interface
+            // DONE: interface
             @Test
             public void should_throw_exception_if_component_is_interface() {
                 assertThrows(IllegalComponentException.class,
@@ -129,7 +138,7 @@ public class InjectionTest {
             static class SubclassWithFieldInjection extends ComponentWithFieldInjection {
             }
 
-            // TODO: inject field
+            // DONE: inject field
             @Test
             public void should_inject_dependency_via_field() {
                 ComponentWithFieldInjection component = new InjectionProvider<>(ComponentWithFieldInjection.class).get(context);
@@ -142,7 +151,9 @@ public class InjectionTest {
                 assertSame(dependency, component.dependency);
             }
 
-            // TODO: provider dependency information for field injection
+            // TODO: include dependency type from inject field
+
+            // DONE provider dependency information for field injection
             @Test
             public void should_include_dependency_from_field_dependencies() {
                 InjectionProvider<ComponentWithFieldInjection> provider =
@@ -151,7 +162,7 @@ public class InjectionTest {
                         provider.getDependencies().toArray(Class<?>[]::new));
             }
 
-            // TODO: support inject field
+            // DONE: support inject field
             static class ProviderInjectField {
                 @Inject
                 Provider<Dependency> dependency;
@@ -166,7 +177,7 @@ public class InjectionTest {
 
         @Nested
         class IllegalInjectFields {
-            // TODO: throw exception if field is final
+            // DONE: throw exception if field is final
             static class FinalInjectField {
                 @Inject
                 final Dependency dependency = null;
@@ -194,7 +205,7 @@ public class InjectionTest {
                 }
             }
 
-            // TODO: inject method with no dependencies will be called
+            // DONE: inject method with no dependencies will be called
             @Test
             public void should_call_inject_method_even_if_no_dependency_declared() {
                 InjectMethodWithNoDependency component = new InjectionProvider<>(InjectMethodWithNoDependency.class).get(context);
@@ -210,14 +221,17 @@ public class InjectionTest {
                 }
             }
 
-            // TODO: inject method with dependencies will be injected
+            // DONE: inject method with dependencies will be injected
             @Test
             public void should_inject_dependency_via_inject_method() {
                 InjectMethodWithDependency component = new InjectionProvider<>(InjectMethodWithDependency.class).get(context);
                 assertSame(dependency, component.dependency);
             }
 
-            // TODO: override inject method from superclass
+            // TODO: include dependency type from inject method
+
+
+            // DONE: override inject method from superclass
             static class SuperClassWithInjectMethod {
                 int superCalled = 0;
 
@@ -270,7 +284,7 @@ public class InjectionTest {
                 assertEquals(0, component.superCalled);
             }
 
-            // TODO: include dependencies from inject method
+            // DONE: include dependencies from inject method
             @Test
             public void should_include_dependencies_from_inject_method() {
                 InjectionProvider<InjectMethodWithDependency> provider
@@ -279,7 +293,7 @@ public class InjectionTest {
                         provider.getDependencies().toArray(Class<?>[]::new));
             }
 
-            // TODO: support inject method
+            // DONE: support inject method
             static class ProviderInjectMethod {
                 Provider<Dependency> dependency;
 
@@ -299,7 +313,7 @@ public class InjectionTest {
         @Nested
         class IllegalInjectMethods {
 
-            // TODO: throw exception if type parameter defined
+            // DONE: throw exception if type parameter defined
             static class InjectMethodWithTypeParameter {
                 @Inject
                 <T> void install() {

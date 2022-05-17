@@ -142,4 +142,9 @@ class InjectionProvider<T> implements ComponentProvider<T> {
         }
         return members;
     }
+
+    @Override
+    public List<Type> getDependencyTypes() {
+        return stream(injectConstructor.getParameters()).map(Parameter::getParameterizedType).toList();
+    }
 }

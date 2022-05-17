@@ -13,6 +13,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static geektime.tdd.di.ContextTest.DependencyCheck.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ContextTest {
@@ -25,7 +26,7 @@ public class ContextTest {
 
     @Nested
     public class TypeBinding {
-        // TODO: instance
+        // DONE: instance
         @Test
         @DisplayName("should bind type to a specific instance")
         public void should_bind_type_to_a_specific_instance() {
@@ -96,8 +97,7 @@ public class ContextTest {
         }
 
         // Context
-        // TODO: could get Provider<T> from context
-
+        // DONE: could get Provider<T> from context
         @Test
         public void should_retrieve_component_bind_type_as_provider() {
             Component instance = new Component() {};
@@ -136,9 +136,8 @@ public class ContextTest {
     @Nested
     public class DependencyCheck {
 
-        // TODO: dependencies not exist
+        // DONE: dependencies not exist
         // 如果组件需要的依赖不存在，则抛出异常
-
         @ParameterizedTest
         @MethodSource
         public void should_throw_exception_if_dependency_not_found_para(Class<? extends Component> component) {
@@ -151,9 +150,12 @@ public class ContextTest {
         }
 
         public static Stream<Arguments> should_throw_exception_if_dependency_not_found_para() {
-            return Stream.of(Arguments.of(Named.of("Inject Constructor", DependencyCheck.MissingDependencyConstructor.class)),
-                    Arguments.of(Named.of("Inject Field", DependencyCheck.MissingDependencyField.class)),
-                    Arguments.of(Named.of("Inject Method", DependencyCheck.MissingDependencyMethod.class)));
+            return Stream.of(Arguments.of(Named.of("Inject Constructor", MissingDependencyConstructor.class)),
+                    Arguments.of(Named.of("Inject Field", MissingDependencyField.class)),
+                    Arguments.of(Named.of("Inject Method", MissingDependencyMethod.class)));
+            // TODO: Arguments.of(Named.of("Provider in Inject Constructor", MissingDependencyProviderConstructor.class))
+            // TODO: provider in inject field
+            // TODO: provider in inject method
         }
 
         static class MissingDependencyConstructor implements Component {
@@ -174,6 +176,13 @@ public class ContextTest {
             }
         }
 
+        static class MissingDependencyProviderConstructor implements Component {
+            @Inject
+            public MissingDependencyProviderConstructor(Provider<Dependency> dependency) {
+            }
+        }
+
+
         // 如果组件间存在循环依赖，则抛出异常
         @ParameterizedTest(name = "cyclic dependency between {0} and {1}")
         @MethodSource
@@ -193,12 +202,12 @@ public class ContextTest {
 
         public static Stream<Arguments> should_throw_exception_if_cyclic_dependencies_found() {
             List<Arguments> arguments = new ArrayList<>();
-            for (Named component : List.of(Named.of("Inject Constructor", DependencyCheck.CyclicComponentInjectConstructor.class),
-                    Named.of("Inject Field", DependencyCheck.CyclicComponentInjectField.class),
-                    Named.of("Inject Method", DependencyCheck.CyclicComponentInjectMethod.class))) {
-                for (Named dependency : List.of(Named.of("Inject Constructor", DependencyCheck.CyclicDependencyInjectConstructor.class),
-                        Named.of("Inject Field", DependencyCheck.CyclicDependencyInjectField.class),
-                        Named.of("Inject Method", DependencyCheck.CyclicDependencyInjectMethod.class))) {
+            for (Named component : List.of(Named.of("Inject Constructor", CyclicComponentInjectConstructor.class),
+                    Named.of("Inject Field", CyclicComponentInjectField.class),
+                    Named.of("Inject Method", CyclicComponentInjectMethod.class))) {
+                for (Named dependency : List.of(Named.of("Inject Constructor", CyclicDependencyInjectConstructor.class),
+                        Named.of("Inject Field", CyclicDependencyInjectField.class),
+                        Named.of("Inject Method", CyclicDependencyInjectMethod.class))) {
                     arguments.add(Arguments.of(component, dependency));
                 }
             }
@@ -265,15 +274,15 @@ public class ContextTest {
 
         public static Stream<Arguments> should_throw_exception_if_transitive_cyclic_dependencies_found() {
             List<Arguments> arguments = new ArrayList<>();
-            for (Named component : List.of(Named.of("Inject Constructor", DependencyCheck.CyclicComponentInjectConstructor.class),
-                    Named.of("Inject Field", DependencyCheck.CyclicComponentInjectField.class),
-                    Named.of("Inject Method", DependencyCheck.CyclicComponentInjectMethod.class))) {
-                for (Named dependency : List.of(Named.of("Inject Constructor", DependencyCheck.IndirectCyclicDependencyInjectConstructor.class),
-                        Named.of("Inject Field", DependencyCheck.IndirectCyclicDependencyInjectField.class),
-                        Named.of("Inject Method", DependencyCheck.IndirectCyclicDependencyInjectMethod.class))) {
-                    for (Named anotherDependency : List.of(Named.of("Inject Constructor", DependencyCheck.IndirectCyclicAnotherDependencyInjectConstructor.class),
-                            Named.of("Inject Field", DependencyCheck.IndirectCyclicAnotherDependencyInjectField.class),
-                            Named.of("Inject Method", DependencyCheck.IndirectCyclicAnotherDependencyInjectMethod.class))) {
+            for (Named component : List.of(Named.of("Inject Constructor", CyclicComponentInjectConstructor.class),
+                    Named.of("Inject Field", CyclicComponentInjectField.class),
+                    Named.of("Inject Method", CyclicComponentInjectMethod.class))) {
+                for (Named dependency : List.of(Named.of("Inject Constructor", IndirectCyclicDependencyInjectConstructor.class),
+                        Named.of("Inject Field", IndirectCyclicDependencyInjectField.class),
+                        Named.of("Inject Method", IndirectCyclicDependencyInjectMethod.class))) {
+                    for (Named anotherDependency : List.of(Named.of("Inject Constructor", IndirectCyclicAnotherDependencyInjectConstructor.class),
+                            Named.of("Inject Field", IndirectCyclicAnotherDependencyInjectField.class),
+                            Named.of("Inject Method", IndirectCyclicAnotherDependencyInjectMethod.class))) {
                         arguments.add(Arguments.of(component, dependency, anotherDependency));
                     }
                 }
