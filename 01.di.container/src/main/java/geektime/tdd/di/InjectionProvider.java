@@ -95,11 +95,6 @@ class InjectionProvider<T> implements ComponentProvider<T> {
         }
     }
 
-    private static <T extends AnnotatedElement> Stream<T> injectable(T[] declaredFields) {
-        return stream(declaredFields)
-                .filter(f -> f.isAnnotationPresent(Inject.class));
-    }
-
     private static <T> List<T> traverse(Class<?> component, BiFunction<List<T>, Class<?>, List<T>> finder) {
         List<T> members = new ArrayList<>();
         Class<?> current = component;
@@ -109,6 +104,11 @@ class InjectionProvider<T> implements ComponentProvider<T> {
             current = current.getSuperclass();
         }
         return members;
+    }
+
+    private static <T extends AnnotatedElement> Stream<T> injectable(T[] declaredFields) {
+        return stream(declaredFields)
+                .filter(f -> f.isAnnotationPresent(Inject.class));
     }
 
     private static boolean isOverride(Method o, Method m) {

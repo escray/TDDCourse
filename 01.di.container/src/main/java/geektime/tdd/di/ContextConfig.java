@@ -40,8 +40,7 @@ public class ContextConfig {
                 if (type.getRawType() != Provider.class) {
                     return Optional.empty();
                 }
-                Class<?> componentType = getComponentType(type);
-                return Optional.ofNullable(providers.get(componentType))
+                return Optional.ofNullable(providers.get(getComponentType(type)))
                         .map(provider -> (Provider<Object>) () -> provider.get(this));
             }
         };
