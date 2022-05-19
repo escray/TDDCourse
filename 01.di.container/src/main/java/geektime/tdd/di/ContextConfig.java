@@ -2,7 +2,6 @@ package geektime.tdd.di;
 
 import jakarta.inject.Provider;
 
-import java.lang.reflect.Type;
 import java.util.*;
 
 public class ContextConfig {
@@ -39,7 +38,7 @@ public class ContextConfig {
     }
 
     private void checkDependencies(Class<?> component, Stack<Class<?>> visiting) {
-        for (Context.Ref dependency : providers.get(component).getDependencyRefs()) {
+        for (Context.Ref dependency : providers.get(component).getDependencies()) {
 
             Class<?> componentType = dependency.getComponent();
 

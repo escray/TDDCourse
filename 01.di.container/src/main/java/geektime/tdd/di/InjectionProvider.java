@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
+import static geektime.tdd.di.Context.*;
 import static java.util.Arrays.stream;
 import static java.util.stream.Stream.concat;
 
@@ -50,11 +51,11 @@ class InjectionProvider<T> implements ComponentProvider<T> {
     }
 
     @Override
-    public List<Type> getDependencies() {
+    public List<Ref> getDependencies() {
         return concat(concat(stream(injectConstructor.getParameters()).map(Parameter::getParameterizedType),
                         injectFields.stream().map(Field::getGenericType)),
                 injectMethods.stream().flatMap(m -> stream(m.getParameters()).map(Parameter::getParameterizedType)))
-                .toList();
+                .map(Ref::of).toList();
     }
 
     private static <T> List<Field> getInjectFields(Class<T> component) {
@@ -134,6 +135,6 @@ class InjectionProvider<T> implements ComponentProvider<T> {
     }
 
     private static Object toDependency(Context context, Type type) {
-        return context.get(Context.Ref.of(type)).get();
+        return context.get(Ref.of(type)).get();
     }
 }
