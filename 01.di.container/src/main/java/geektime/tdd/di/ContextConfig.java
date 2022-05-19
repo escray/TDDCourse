@@ -31,35 +31,55 @@ public class ContextConfig {
                 return getComponent((Class<?>) type);
             }
 
-            private <T> Optional<T> getComponent(Class<T> type) {
-                return Optional.ofNullable(providers.get(type))
-                        .map(provider -> (T) provider.get(this));
+            private Optional getComponent(Class type) {
+                Ref ref = Ref.of(type);
+
+                return Optional.ofNullable(providers.get(ref.getComponent()))
+                        .map(provider -> provider.get(this));
             }
 
             private Optional getContainer(ParameterizedType type) {
-                if (type.getRawType() != Provider.class) {
+                Ref ref = Ref.of(type);
+
+                if (ref.getContainer() != Provider.class) {
                     return Optional.empty();
                 }
-                return Optional.ofNullable(providers.get(getComponentType(type)))
+                return Optional.ofNullable(providers.get(ref.getComponent()))
                         .map(provider -> (Provider<Object>) () -> provider.get(this));
             }
         };
     }
 
     // Concept missing
-    // Type -> Reference
-    // 行为封装从接口开始
-    // 充血模型
-    interface Ref {
-        Optional get();
-        void checkDependencies(Map providers);
-    }
-
     // ComponentRef, ContainerRef -> Ref
+    // 数据封装
+    static class Ref {
+        private Type container;
+        private Class<?> component;
 
-    // 数据封装？状态封装？
-    class Reference {
+        Ref(ParameterizedType container) {
+            this.container = container.getRawType();
+            this.component = (Class<?>) container.getActualTypeArguments()[0];
+        }
 
+        Ref(Class<?> component) {
+            this.component = component;
+        }
+
+        static Ref of(Type type) {
+            if (type instanceof ParameterizedType container) {
+                return new Ref(container);
+            }
+            return new Ref((Class<?>) type);
+        }
+
+        public Type getContainer() {
+            return container;
+        }
+
+        public Class<?> getComponent() {
+            return component;
+        }
     }
 
     private Class<?> getComponentType(Type type) {
@@ -81,20 +101,24 @@ public class ContextConfig {
     }
 
     private void checkContainerTypeDependency(Class<?> component, Type dependency) {
-        if (!providers.containsKey(getComponentType(dependency))) {
-            throw new DependencyNotFoundException(component, getComponentType(dependency));
+        Class<?> componentType = getComponentType(dependency);
+
+        if (!providers.containsKey(componentType)) {
+            throw new DependencyNotFoundException(component, componentType);
         }
     }
 
-    private void checkComponentDependency(Class<?> component, Stack<Class<?>> visiting, Class<?> dependency) {
-        if (!providers.containsKey(dependency)) {
-            throw new DependencyNotFoundException(component, dependency);
+    private void checkComponentDependency(Class<?> component, Stack<Class<?>> visiting, Class<?> dependency) {Type containerType = null;
+        Class<?> componentType = dependency;
+
+        if (!providers.containsKey(componentType)) {
+            throw new DependencyNotFoundException(component, componentType);
         }
-        if (visiting.contains(dependency)) {
+        if (visiting.contains(componentType)) {
             throw new CyclicDependenciesFoundException(visiting);
         }
-        visiting.push(dependency);
-        checkDependencies(dependency, visiting);
+        visiting.push(componentType);
+        checkDependencies(componentType, visiting);
         visiting.pop();
     }
 }
