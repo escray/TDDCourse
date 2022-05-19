@@ -46,6 +46,22 @@ public class ContextConfig {
         };
     }
 
+    // Concept missing
+    // Type -> Reference
+    // 行为封装从接口开始
+    // 充血模型
+    interface Ref {
+        Optional get();
+        void checkDependencies(Map providers);
+    }
+
+    // ComponentRef, ContainerRef -> Ref
+
+    // 数据封装？状态封装？
+    class Reference {
+
+    }
+
     private Class<?> getComponentType(Type type) {
         return (Class<?>)((ParameterizedType) type).getActualTypeArguments()[0];
     }
