@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.internal.util.collections.Sets;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.stream.Stream;
@@ -137,6 +138,23 @@ public class ContextTest {
             }
         }
 
+        @Nested
+        public class WithQualifier {
+            // TODO: binding component with qualifier
+
+            @Test
+            public void should_bind_instance_with_qualifier() {
+                Component instance = new Component() {};
+                config.bind(Component.class, instance, new NamedLiteral("ChosenOne"));
+
+                Context context = config.getContext();
+                Component chosenOne = context.get(Ref.of(Component.class, new NamedLiteral("ChosenOne"))).get();
+                assertSame(instance, chosenOne);
+            }
+
+            // TODO: binding component with multi qualifiers
+            // TODO: throw illegal component if illegal qualifier
+        }
     }
 
     @Nested
@@ -356,5 +374,20 @@ public class ContextTest {
             Context context = config.getContext();
             assertTrue(context.get(Ref.of(Component.class)).isPresent());
         }
+
+        @Nested
+        public class WithQualifier {
+            // TODO: dependency missing if qualifier not match
+            // TODO: check cyclic dependencies with qualifier
+        }
+
+    }
+}
+
+record NamedLiteral(String value) implements jakarta.inject.Named {
+
+    @Override
+    public Class<? extends Annotation> annotationType() {
+        return jakarta.inject.Named.class;
     }
 }
