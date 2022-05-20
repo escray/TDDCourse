@@ -9,17 +9,22 @@ public class ContextConfig {
     private final Map<Class<?>, ComponentProvider<?>> providers = new HashMap<>();
     private Map<Component, ComponentProvider<?>> components = new HashMap<>();
 
-    public <T> void bind(Class<T> type, T instance) {
-        providers.put(type, (ComponentProvider<T>) context -> instance);
-    }
-
-    public <T, Implementation extends T>
-    void bind(Class<T> type, Class<Implementation> implementation) {
-        providers.put(type, new InjectionProvider<>(implementation));
+    public <Type> void bind(Class<Type> type, Type instance) {
+        providers.put(type, (ComponentProvider<Type>) context -> instance);
     }
 
     public <Type> void bind(Class<Type> type, Type instance, Annotation qualifier) {
         components.put(new Component(type, qualifier), context -> instance);
+    }
+
+    public <Type, Implementation extends Type>
+    void bind(Class<Type> type, Class<Implementation> implementation) {
+        providers.put(type, new InjectionProvider<>(implementation));
+    }
+
+    public <Type, Implementation extends Type>
+    void bind(Class<Type> type, Class<Implementation> implementation, Annotation qualifier) {
+        components.put(new Component(type, qualifier), new InjectionProvider<>(implementation));
     }
 
     record Component(Class<?> type, Annotation qualifier) {}

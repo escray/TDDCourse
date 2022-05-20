@@ -75,8 +75,6 @@ public class ContextTest {
         static class FieldInjection implements Component {
             @Inject
             Dependency dependency;
-
-
             public Dependency dependency() {
                 return dependency;
             }
@@ -150,6 +148,17 @@ public class ContextTest {
                 Context context = config.getContext();
                 Component chosenOne = context.get(Ref.of(Component.class, new NamedLiteral("ChosenOne"))).get();
                 assertSame(instance, chosenOne);
+            }
+
+            @Test
+            public void should_bind_component_with_qualifier() {
+                Dependency dependency = new Dependency(){};
+                config.bind(Dependency.class, dependency);
+                config.bind(InjectConstructor.class, InjectConstructor.class, new NamedLiteral("ChosenOne"));
+                Context context = config.getContext();
+                InjectConstructor chosenOne = context.get(Context.Ref.of(InjectConstructor.class, new NamedLiteral("ChosenOne"))).get();
+                assertSame(dependency, chosenOne.getDependency());
+
             }
 
             // TODO: binding component with multi qualifiers
