@@ -10,7 +10,8 @@ public class ContextConfig {
     private Map<Component, ComponentProvider<?>> components = new HashMap<>();
 
     public <Type> void bind(Class<Type> type, Type instance) {
-        providers.put(type, (ComponentProvider<Type>) context -> instance);
+        components.put(new Component(type, null), (ComponentProvider<Type>) context -> instance);
+        // providers.put(type, (ComponentProvider<Type>) context -> instance);
     }
 
     public <Type> void bind(Class<Type> type, Type instance, Annotation... qualifiers) {
@@ -21,7 +22,8 @@ public class ContextConfig {
 
     public <Type, Implementation extends Type>
     void bind(Class<Type> type, Class<Implementation> implementation) {
-        providers.put(type, new InjectionProvider<>(implementation));
+        // providers.put(type, new InjectionProvider<>(implementation));
+        components.put(new Component(type, null), new InjectionProvider<>(implementation));
     }
 
     public <Type, Implementation extends Type>
@@ -34,18 +36,18 @@ public class ContextConfig {
     record Component(Class<?> type, Annotation qualifier) {}
 
     public Context getContext() {
-        providers.keySet()
-                .forEach(component -> checkDependencies(component, new Stack<>()));
-//        components.keySet().forEach(component -> checkDependencies(component, new Stack<>()));
+//        providers.keySet()
+//                .forEach(component -> checkDependencies(component, new Stack<>()));
+        components.keySet().forEach(component -> checkDependencies(component, new Stack<>()));
 
         return new Context() {
             @Override
             public <ComponentType> Optional<ComponentType> get(Ref<ComponentType> ref) {
-                if (ref.getQualifier() != null) {
-                    return Optional.ofNullable(components
-                                    .get(new Component(ref.getComponent(), ref.getQualifier())))
-                            .map(provider -> (ComponentType)provider.get(this));
-                }
+//                if (ref.getQualifier() != null) {
+//                    return Optional.ofNullable(components
+//                                    .get(new Component(ref.getComponent(), ref.getQualifier())))
+//                            .map(provider -> (ComponentType)provider.get(this));
+//                }
 
                 if (ref.isContainer()) {
                     if (ref.getContainer() != Provider.class) {
@@ -62,28 +64,27 @@ public class ContextConfig {
     }
 
     private <ComponentType> ComponentProvider<?> getProvider(Context.Ref<ComponentType> ref) {
-//        components.get(new Component(ref.getComponent(), ref.getQualifier()));
-        return providers.get(ref.getComponent());
+        return components.get(new Component(ref.getComponent(), ref.getQualifier()));
+//        return providers.get(ref.getComponent());
     }
 
-    private void checkDependencies(/* Component */Class<?> component, Stack<Class<?>> visiting) {
+    private void checkDependencies(Component component, Stack<Class<?>> visiting) {
 
         // for (Context.Ref dependency : components.get(component).getDependencies()) {
-        for (Context.Ref dependency : providers.get(component).getDependencies()) {
+        for (Context.Ref dependency : components.get(component).getDependencies()) {
 
-            Class<?> componentType = dependency.getComponent();
-
-            if (!providers.containsKey(componentType)) {
-                throw new DependencyNotFoundException(component, componentType);
+            if (!components.containsKey(new Component(dependency.getComponent(), dependency.getQualifier()))) {
+                throw new DependencyNotFoundException(component.type(), dependency.getComponent());
             }
 
             if (!dependency.isContainer()) {
-                if (visiting.contains(componentType)) {
+                if (visiting.contains(dependency.getComponent())) {
                     throw new CyclicDependenciesFoundException(visiting);
                 }
-                visiting.push(componentType);
+                //visiting.push(componentType);
                 // checkDependencies(new Component(), visiting);
-                checkDependencies(componentType, visiting);
+                visiting.push(dependency.getComponent());
+                checkDependencies(new Component(dependency.getComponent(), dependency.getQualifier()), visiting);
                 visiting.pop();
             }
         }
