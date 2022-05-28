@@ -161,7 +161,7 @@ public class ContextTest {
 //
 //            }
 
-            // TODO: binding component with multi qualifiers
+            // DONE: binding component with multi qualifiers
             @Test
             public void should_bind_instance_with_multi_qualifiers() {
                 TestComponent instance = new TestComponent(){};
@@ -195,13 +195,21 @@ public class ContextTest {
                 assertSame(dependency, skywalker.getDependency());
             }
 
-            // TODO: throw illegal component if illegal qualifier
+            // DONE: throw illegal component if illegal qualifier
 
             @Test
             public void should_throw_exception_if_illegal_qualifier_to_instance() {
                 TestComponent instance = new TestComponent() { };
                 assertThrows(IllegalComponentException.class,
                         () -> config.bind(TestComponent.class, instance, new TestLiteral()));
+            }
+
+            @Test
+            public void should_throw_exception_if_illegal_qualifier_to_component() {
+                Dependency dependency = new Dependency() {};
+                config.bind(Dependency.class, dependency);
+                assertThrows(IllegalComponentException.class,
+                        () -> config.bind(InjectConstructor.class, InjectConstructor.class, new TestLiteral()));
             }
         }
     }
