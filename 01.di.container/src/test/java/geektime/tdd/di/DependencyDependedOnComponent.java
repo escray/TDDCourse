@@ -3,10 +3,10 @@ package geektime.tdd.di;
 import jakarta.inject.Inject;
 
 class DependencyDependedOnComponent implements Dependency {
-    private Component component;
+    private TestComponent component;
 
     @Inject
-    public DependencyDependedOnComponent(Component component) {
+    public DependencyDependedOnComponent(TestComponent component) {
         this.component = component;
     }
 }

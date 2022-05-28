@@ -2,7 +2,7 @@ package geektime.tdd.di;
 
 import jakarta.inject.Inject;
 
-class InjectConstructor implements Component {
+class InjectConstructor implements TestComponent {
     private Dependency dependency;
 
     @Inject

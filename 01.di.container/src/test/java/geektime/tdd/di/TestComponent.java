@@ -1,6 +1,6 @@
 package geektime.tdd.di;
 
-interface Component {
+interface TestComponent {
     default Dependency dependency() {
         return null;
     };

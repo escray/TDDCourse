@@ -1,6 +1,6 @@
 package geektime.tdd.di;
 
-class DefaultConstructor implements Component {
+class DefaultConstructor implements TestComponent {
     public DefaultConstructor() {
     }
 }
