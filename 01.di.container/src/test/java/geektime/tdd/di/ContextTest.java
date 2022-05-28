@@ -2,6 +2,7 @@ package geektime.tdd.di;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import jakarta.inject.Qualifier;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -13,6 +14,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ContextTest {
@@ -138,39 +140,39 @@ public class ContextTest {
         @Nested
         public class WithQualifier {
             // DONE: binding component with qualifier
-            @Test
-            public void should_bind_instance_with_qualifier() {
-                TestComponent instance = new TestComponent() {};
-                config.bind(TestComponent.class, instance, new NamedLiteral("ChosenOne"));
-
-                Context context = config.getContext();
-                TestComponent chosenOne = context.get(ComponentRef.of(TestComponent.class, new NamedLiteral("ChosenOne"))).get();
-                assertSame(instance, chosenOne);
-            }
-
-            @Test
-            public void should_bind_component_with_qualifier() {
-                Dependency dependency = new Dependency(){};
-                config.bind(Dependency.class, dependency);
-                config.bind(InjectConstructor.class, InjectConstructor.class, new NamedLiteral("ChosenOne"));
-                Context context = config.getContext();
-                InjectConstructor chosenOne = context.get(ComponentRef.of(InjectConstructor.class, new NamedLiteral("ChosenOne"))).get();
-                assertSame(dependency, chosenOne.getDependency());
-
-            }
+//            @Test
+//            public void should_bind_instance_with_qualifier() {
+//                TestComponent instance = new TestComponent() {};
+//                config.bind(TestComponent.class, instance, new NamedLiteral("ChosenOne"));
+//
+//                Context context = config.getContext();
+//                TestComponent chosenOne = context.get(ComponentRef.of(TestComponent.class, new NamedLiteral("ChosenOne"))).get();
+//                assertSame(instance, chosenOne);
+//            }
+//
+//            @Test
+//            public void should_bind_component_with_qualifier() {
+//                Dependency dependency = new Dependency(){};
+//                config.bind(Dependency.class, dependency);
+//                config.bind(InjectConstructor.class, InjectConstructor.class, new NamedLiteral("ChosenOne"));
+//                Context context = config.getContext();
+//                InjectConstructor chosenOne = context.get(ComponentRef.of(InjectConstructor.class, new NamedLiteral("ChosenOne"))).get();
+//                assertSame(dependency, chosenOne.getDependency());
+//
+//            }
 
             // TODO: binding component with multi qualifiers
-
             @Test
             public void should_bind_instance_with_multi_qualifiers() {
                 TestComponent instance = new TestComponent(){};
                 config.bind(TestComponent.class, instance,
                         new NamedLiteral("ChoseOne"),
-                        new NamedLiteral("Skywalker"));
+                        // new NamedLiteral("Skywalker"));
+                        new SkywalkerLiteral());
                 Context context = config.getContext();
 
                 TestComponent choseOne = context.get(ComponentRef.of(TestComponent.class, new NamedLiteral("ChoseOne"))).get();
-                TestComponent skywalker = context.get(ComponentRef.of(TestComponent.class, new NamedLiteral("Skywalker"))).get();
+                TestComponent skywalker = context.get(ComponentRef.of(TestComponent.class, new SkywalkerLiteral())).get();
 
                 assertSame(instance, choseOne);
                 assertSame(instance, skywalker);
@@ -182,17 +184,25 @@ public class ContextTest {
                 config.bind(Dependency.class, dependency);
                 config.bind(InjectConstructor.class, InjectConstructor.class,
                         new NamedLiteral("ChosenOne"),
-                        new NamedLiteral("Skywalker"));
+                        new SkywalkerLiteral());
+//                        new NamedLiteral("Skywalker"));
 
                 Context context = config.getContext();
                 InjectConstructor chosenOne = context.get(ComponentRef.of(InjectConstructor.class, new NamedLiteral("ChosenOne"))).get();
-                InjectConstructor skywalker = context.get(ComponentRef.of(InjectConstructor.class, new NamedLiteral("Skywalker"))).get();
+                InjectConstructor skywalker = context.get(ComponentRef.of(InjectConstructor.class, new SkywalkerLiteral())).get();
 
                 assertSame(dependency, chosenOne.getDependency());
                 assertSame(dependency, skywalker.getDependency());
             }
 
             // TODO: throw illegal component if illegal qualifier
+
+            @Test
+            public void should_throw_exception_if_illegal_qualifier_to_instance() {
+                TestComponent instance = new TestComponent() { };
+                assertThrows(IllegalComponentException.class,
+                        () -> config.bind(TestComponent.class, instance, new TestLiteral()));
+            }
         }
     }
 
@@ -424,9 +434,28 @@ public class ContextTest {
 }
 
 record NamedLiteral(String value) implements jakarta.inject.Named {
-
     @Override
     public Class<? extends Annotation> annotationType() {
         return jakarta.inject.Named.class;
+    }
+}
+
+@java.lang.annotation.Documented
+@java.lang.annotation.Retention(RUNTIME)
+@jakarta.inject.Qualifier
+@interface Skywalker {
+}
+
+record SkywalkerLiteral() implements Skywalker {
+    @Override
+    public Class<? extends Annotation> annotationType() {
+        return Skywalker.class;
+    }
+}
+
+record TestLiteral() implements Test {
+    @Override
+    public Class<? extends Annotation> annotationType() {
+        return Test.class;
     }
 }
