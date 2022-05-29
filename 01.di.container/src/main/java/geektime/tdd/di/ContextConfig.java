@@ -7,8 +7,9 @@ import java.lang.annotation.Annotation;
 import java.util.*;
 
 public class ContextConfig {
-    private Map<Component, ComponentProvider<?>> components = new HashMap<>();
+    private final Map<Component, ComponentProvider<?>> components = new HashMap<>();
 
+    // bind instance
     public <Type> void bind(Class<Type> type, Type instance) {
         components.put(new Component(type, null), (ComponentProvider<Type>) context -> instance);
     }
@@ -22,6 +23,7 @@ public class ContextConfig {
         }
     }
 
+    // bind component
     public <Type, Implementation extends Type>
     void bind(Class<Type> type, Class<Implementation> implementation) {
         components.put(new Component(type, null), new InjectionProvider<>(implementation));
@@ -63,8 +65,6 @@ public class ContextConfig {
 
     private void checkDependencies(Component component, Stack<Class<?>> visiting) {
         for (ComponentRef dependency : components.get(component).getDependencies()) {
-
-
             if (!components.containsKey(dependency.component())) {
                 throw new DependencyNotFoundException(component.type(), dependency.getComponentType());
             }
