@@ -15,14 +15,10 @@ public class ContainerTest {
     public class DependenciesSelection {
         @Nested
         public class ProviderType {
-
-
-
         }
 
         @Nested
         public class Qualifier {
-
         }
     }
 

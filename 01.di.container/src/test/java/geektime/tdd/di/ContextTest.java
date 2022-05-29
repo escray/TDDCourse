@@ -50,7 +50,6 @@ public class ContextTest {
             Optional<TestComponent> component = config.getContext().get(ComponentRef.of(TestComponent.class));
 
             assertTrue(component.isPresent());
-//            assertSame(dependency, component.get().dependency());
         }
 
         public static Stream<Arguments> should_bind_type_to_an_injectable_component() {
@@ -107,12 +106,9 @@ public class ContextTest {
 
             ParameterizedType type = new TypeLiteral<Provider<TestComponent>>() {}.getType();
 
-//            context.get(new Context.Ref<Provider<Component>>() {});
-
             assertEquals(Provider.class, type.getRawType());
             assertEquals(TestComponent.class, type.getActualTypeArguments()[0]);
 
-//            Provider<Component> provider = (Provider<Component>) context.get(Ref.of(type)).get();
             Provider<TestComponent> provider = context.get(new ComponentRef<Provider<TestComponent>>(){}).get();
             assertSame(instance, provider.get());
         }
@@ -126,7 +122,6 @@ public class ContextTest {
 
             ParameterizedType type = new TypeLiteral<List<TestComponent>>() {}.getType();
 
-//            assertFalse(context.get(Ref.of(type)).isPresent());
             assertFalse(context.get(new ComponentRef<List<TestComponent>>() {
             }).isPresent());
         }
@@ -140,27 +135,6 @@ public class ContextTest {
         @Nested
         public class WithQualifier {
             // DONE: binding component with qualifier
-//            @Test
-//            public void should_bind_instance_with_qualifier() {
-//                TestComponent instance = new TestComponent() {};
-//                config.bind(TestComponent.class, instance, new NamedLiteral("ChosenOne"));
-//
-//                Context context = config.getContext();
-//                TestComponent chosenOne = context.get(ComponentRef.of(TestComponent.class, new NamedLiteral("ChosenOne"))).get();
-//                assertSame(instance, chosenOne);
-//            }
-//
-//            @Test
-//            public void should_bind_component_with_qualifier() {
-//                Dependency dependency = new Dependency(){};
-//                config.bind(Dependency.class, dependency);
-//                config.bind(InjectConstructor.class, InjectConstructor.class, new NamedLiteral("ChosenOne"));
-//                Context context = config.getContext();
-//                InjectConstructor chosenOne = context.get(ComponentRef.of(InjectConstructor.class, new NamedLiteral("ChosenOne"))).get();
-//                assertSame(dependency, chosenOne.getDependency());
-//
-//            }
-
             // DONE: binding component with multi qualifiers
             @Test
             public void should_bind_instance_with_multi_qualifiers() {
@@ -185,7 +159,6 @@ public class ContextTest {
                 config.bind(InjectConstructor.class, InjectConstructor.class,
                         new NamedLiteral("ChosenOne"),
                         new SkywalkerLiteral());
-//                        new NamedLiteral("Skywalker"));
 
                 Context context = config.getContext();
                 InjectConstructor chosenOne = context.get(ComponentRef.of(InjectConstructor.class, new NamedLiteral("ChosenOne"))).get();
@@ -196,7 +169,6 @@ public class ContextTest {
             }
 
             // DONE: throw illegal component if illegal qualifier
-
             @Test
             public void should_throw_exception_if_illegal_qualifier_to_instance() {
                 TestComponent instance = new TestComponent() { };
@@ -206,11 +178,11 @@ public class ContextTest {
 
             @Test
             public void should_throw_exception_if_illegal_qualifier_to_component() {
-                Dependency dependency = new Dependency() {};
-                config.bind(Dependency.class, dependency);
                 assertThrows(IllegalComponentException.class,
                         () -> config.bind(InjectConstructor.class, InjectConstructor.class, new TestLiteral()));
             }
+
+            // TODO: Provider
         }
     }
 
@@ -253,7 +225,6 @@ public class ContextTest {
         }
 
         static class MissingDependencyMethod implements TestComponent {
-
             @Inject
             void install(Dependency dependency) {
             }
@@ -435,6 +406,23 @@ public class ContextTest {
         @Nested
         public class WithQualifier {
             // TODO: dependency missing if qualifier not match
+
+            @Test
+            @Disabled
+            public void should_throw_exception_if_dependency_with_qualifier_not_found() {
+                config.bind(Dependency.class, new Dependency(){});
+                config.bind(InjectConstructor.class, InjectConstructor.class);
+
+                assertThrows(DependencyNotFoundException.class, () -> config.getContext());
+            }
+
+            static class InjectConstructor {
+                @Inject
+                public InjectConstructor(@Skywalker Dependency dependency) {
+
+                }
+            }
+
             // TODO: check cyclic dependencies with qualifier
         }
 
