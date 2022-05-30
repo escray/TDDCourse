@@ -198,8 +198,8 @@ public class ContextTest {
 
             DependencyNotFoundException exception = assertThrows(DependencyNotFoundException.class, () -> config.getContext());
 
-            assertEquals(Dependency.class, exception.getDependency());
-            assertEquals(TestComponent.class, exception.getComponent());
+            assertEquals(Dependency.class, exception.getDependencyComponent().type());
+            assertEquals(TestComponent.class, exception.getComponentComponent().type());
         }
 
         // DONE: provider in inject field
@@ -408,12 +408,15 @@ public class ContextTest {
             // TODO: dependency missing if qualifier not match
 
             @Test
-            @Disabled
             public void should_throw_exception_if_dependency_with_qualifier_not_found() {
                 config.bind(Dependency.class, new Dependency(){});
-                config.bind(InjectConstructor.class, InjectConstructor.class);
+                config.bind(InjectConstructor.class, InjectConstructor.class, new NamedLiteral("Owner"));
 
-                assertThrows(DependencyNotFoundException.class, () -> config.getContext());
+                DependencyNotFoundException exception = assertThrows(DependencyNotFoundException.class, () -> config.getContext());
+
+                assertEquals(new Component(InjectConstructor.class, new NamedLiteral("Owner")), exception.getComponentComponent());
+                assertEquals(new Component(Dependency.class, new SkywalkerLiteral()), exception.getDependencyComponent());
+
             }
 
             static class InjectConstructor {
@@ -434,6 +437,14 @@ record NamedLiteral(String value) implements jakarta.inject.Named {
     public Class<? extends Annotation> annotationType() {
         return jakarta.inject.Named.class;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof jakarta.inject.Named named) {
+            return Objects.equals(value, named.value());
+        }
+        return false;
+    }
 }
 
 @java.lang.annotation.Documented
@@ -447,6 +458,11 @@ record SkywalkerLiteral() implements Skywalker {
     public Class<? extends Annotation> annotationType() {
         return Skywalker.class;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Skywalker;
+    }
 }
 
 record TestLiteral() implements Test {
@@ -454,4 +470,6 @@ record TestLiteral() implements Test {
     public Class<? extends Annotation> annotationType() {
         return Test.class;
     }
+
+
 }

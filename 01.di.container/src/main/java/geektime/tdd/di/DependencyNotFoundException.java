@@ -1,19 +1,20 @@
 package geektime.tdd.di;
 
 public class DependencyNotFoundException extends RuntimeException {
-    private Class<?> dependency;
-    private Class<?> component;
 
-    public DependencyNotFoundException(Class<?> component, Class<?> dependency) {
-        this.dependency = dependency;
-        this.component = component;
+    private final Component componentComponent;
+    private final Component dependencyComponent;
+
+    public DependencyNotFoundException(Component componentComponent, Component dependencyComponent) {
+        this.dependencyComponent = dependencyComponent;
+        this.componentComponent = componentComponent;
     }
 
-    public Class<?> getDependency() {
-        return dependency;
+    public Component getDependencyComponent() {
+        return dependencyComponent;
     }
 
-    public Class<?> getComponent() {
-        return component;
+    public Component getComponentComponent() {
+        return componentComponent;
     }
 }

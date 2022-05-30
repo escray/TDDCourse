@@ -1,5 +1,7 @@
 package geektime.tdd.di;
 
+import jakarta.inject.Qualifier;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -19,6 +21,10 @@ public class ComponentRef<ComponentType> {
 
     public static ComponentRef of(Type type) {
         return new ComponentRef(type, null);
+    }
+
+    public static ComponentRef of(Type type, Annotation qualifier) {
+        return new ComponentRef(type, qualifier);
     }
 
     private Type container;
@@ -70,4 +76,12 @@ public class ComponentRef<ComponentType> {
     public int hashCode() {
         return Objects.hash(container, component);
     }
+
+//    @Override
+//    public String toString() {
+//        return "ComponentRef{" +
+//                "container=" + container +
+//                ", component=" + component +
+//                '}';
+//    }
 }
