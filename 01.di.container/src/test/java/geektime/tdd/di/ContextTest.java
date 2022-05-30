@@ -2,7 +2,6 @@ package geektime.tdd.di;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
-import jakarta.inject.Qualifier;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -198,8 +197,8 @@ public class ContextTest {
 
             DependencyNotFoundException exception = assertThrows(DependencyNotFoundException.class, () -> config.getContext());
 
-            assertEquals(Dependency.class, exception.getDependencyComponent().type());
-            assertEquals(TestComponent.class, exception.getComponentComponent().type());
+            assertEquals(Dependency.class, exception.getDependency().type());
+            assertEquals(TestComponent.class, exception.getComponent().type());
         }
 
         // DONE: provider in inject field
@@ -414,8 +413,8 @@ public class ContextTest {
 
                 DependencyNotFoundException exception = assertThrows(DependencyNotFoundException.class, () -> config.getContext());
 
-                assertEquals(new Component(InjectConstructor.class, new NamedLiteral("Owner")), exception.getComponentComponent());
-                assertEquals(new Component(Dependency.class, new SkywalkerLiteral()), exception.getDependencyComponent());
+                assertEquals(new Component(InjectConstructor.class, new NamedLiteral("Owner")), exception.getComponent());
+                assertEquals(new Component(Dependency.class, new SkywalkerLiteral()), exception.getDependency());
 
             }
 
@@ -427,6 +426,38 @@ public class ContextTest {
             }
 
             // TODO: check cyclic dependencies with qualifier
+            // @Skywalker A -> @Skywalker B -> @Skywalker A
+            // A -> A
+            // A -> @Skywalker A not cyclic dependencies
+            // A -> @Skywalker A -> @Named A(instance) => not cyclic dependencies
+            static class SkywalkerDependency implements Dependency {
+                @Inject
+                public SkywalkerDependency(@jakarta.inject.Named("ChosenOne") Dependency dependency) {
+                }
+            }
+
+            static class NotCyclicDependency implements Dependency {
+                @Inject
+                public NotCyclicDependency(@Skywalker Dependency dependency) {
+                }
+            }
+
+            @Test
+            public void should_not_throw_cyclic_exception_if_component_with_same_type_taged_with_different_qualifier() {
+                Dependency instance = new Dependency() {
+                };
+                config.bind(Dependency.class, instance, new NamedLiteral("ChosenOne"));
+                config.bind(Dependency.class, SkywalkerDependency.class, new SkywalkerLiteral());
+                config.bind(Dependency.class, NotCyclicDependency.class);
+
+//                try {
+//                    config.getContext();
+//                } catch (DependencyNotFoundException e) {
+//                    System.out.println(e.getDependency());
+//                }
+
+                assertDoesNotThrow(() -> config.getContext());
+            }
         }
 
     }
@@ -444,6 +475,11 @@ record NamedLiteral(String value) implements jakarta.inject.Named {
             return Objects.equals(value, named.value());
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return "value".hashCode() * 127 ^ value.hashCode();
     }
 }
 
