@@ -61,7 +61,7 @@ class InjectionProvider<T> implements ComponentProvider<T> {
                 injectMethods.stream().flatMap(m -> stream(m.getParameters()).map(this::toComponentRef))).toList();
     }
 
-    // TODO: 2 -> 1
+    // TODO: 2 -> 1 ?
     private ComponentRef toComponentRef(Field field) {
         return ComponentRef.of(field.getGenericType(), getQualifier(field));
     }
@@ -69,12 +69,6 @@ class InjectionProvider<T> implements ComponentProvider<T> {
     private ComponentRef toComponentRef(Parameter parameter) {
         return ComponentRef.of(parameter.getParameterizedType(), getQualifier(parameter));
     }
-
-//    private static Annotation getQualifier(Field field) {
-//        return stream(field.getAnnotations())
-//                .filter(a -> a.annotationType().isAnnotationPresent(Qualifier.class))
-//                .findFirst().orElse(null);
-//    }
 
     private static Annotation getQualifier(AnnotatedElement element) {
         List<Annotation> qualifiers = stream(element.getAnnotations())

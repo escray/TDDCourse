@@ -7,9 +7,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Objects;
 
-// Concept missing
-// ComponentRef, ContainerRef -> Ref
-// 数据封装
 public class ComponentRef<ComponentType> {
     public static <ComponentType> ComponentRef<ComponentType> of(Class<ComponentType> component) {
         return new ComponentRef(component, null);
