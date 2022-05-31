@@ -3,9 +3,11 @@ package geektime.tdd.di;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Provider;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Optional;
@@ -27,7 +29,8 @@ public class InjectionTest {
         dependencyProviderType = (ParameterizedType) InjectionTest.class.getDeclaredField("dependencyProvider").getGenericType();
         when(context.get(eq(ComponentRef.of(Dependency.class))))
                 .thenReturn(Optional.of(dependency));
-        when(context.get(eq(ComponentRef.of(dependencyProviderType)))).thenReturn(Optional.of(dependencyProvider));
+        when(context.get(eq(ComponentRef.of(dependencyProviderType))))
+                .thenReturn(Optional.of(dependencyProvider));
     }
 
     @Nested
@@ -125,25 +128,51 @@ public class InjectionTest {
 
         @Nested
         class WithQualifier {
-            // TODO: inject with Qualifier
-            // TODO: include qualifier with dependency
 
+            @BeforeEach
+            void beforeEach() {
+                Mockito.reset(context);
+                when(context.get(eq(ComponentRef.of(Dependency.class, new NamedLiteral("ChosenOne")))))
+                        .thenReturn(Optional.of(dependency));
+            }
+
+            // DONE: inject with Qualifier
+            // DONE: include qualifier with dependency
             static class InjectConstructor {
+                Dependency dependency;
                 @Inject
                 public InjectConstructor(@Named("ChosenOne") Dependency dependency) {
+                    this.dependency = dependency;
                 }
             }
 
+            @Test
+            public void should_inject_dependency_with_qualifier_via_constructor() {
+                InjectionProvider<InjectConstructor> provider = new InjectionProvider<>(InjectConstructor.class);
+                InjectConstructor component = provider.get(context);
+                assertSame(dependency, component.dependency);
+            }
 
             @Test
-            public void should_include_qualifier_with_dependency() {
+            public void should_include_dependency_with_qualifier() {
                 InjectionProvider<InjectConstructor> provider = new InjectionProvider<>(InjectConstructor.class);
                 assertArrayEquals(new ComponentRef<?>[] {
                         ComponentRef.of(Dependency.class, new NamedLiteral("ChosenOne"))
                 }, provider.getDependencies().toArray());
             }
 
-            // TODO: throw illegal component if illegal qualifier given to injection point
+            // DONE: throw illegal component if illegal qualifier given to injection point
+            static class MultiQualifierInjectConstructor {
+                @Inject
+                public MultiQualifierInjectConstructor(@Named("ChosenOne") @Skywalker Dependency dependency) {
+                }
+            }
+
+            @Test
+            public void should_throw_exception_if_multi_qualifiers_given() {
+                assertThrows(IllegalComponentException.class,
+                        () -> new InjectionProvider<>(MultiQualifierInjectConstructor.class));
+            }
         }
     }
 
@@ -219,8 +248,47 @@ public class InjectionTest {
 
         @Nested
         class WithQualifier {
-            // TODO: inject with qualifier
+            @BeforeEach
+            public void beforeEach() {
+                Mockito.reset(context);
+                when(context.get(eq(ComponentRef.of(Dependency.class, new NamedLiteral("ChosenOne")))))
+                        .thenReturn(Optional.of(dependency));
+            }
+
+            static class InjectField {
+                @Inject
+                @Named("ChosenOne") Dependency dependency;
+            }
+
+            // DONE: inject with qualifier
+            @Test
+            public void should_inject_dependency_with_qualifier_via_field() {
+                InjectionProvider<InjectField> provider = new InjectionProvider<>(InjectField.class);
+                InjectField component = provider.get(context);
+                assertSame(dependency, component.dependency);
+            }
+
+            // DONE: include dependency with qualifier
+            @Test
+            public void should_include_dependency_with_qualifier() {
+                InjectionProvider<InjectField> provider = new InjectionProvider<>(InjectField.class);
+                assertArrayEquals(new ComponentRef<?>[]{ComponentRef.of(Dependency.class, new NamedLiteral("ChosenOne"))},
+                        provider.getDependencies().toArray());
+            }
+
             // TODO: throw illegal component if illegal qualifier given to injection point
+            static class MultiQualifiersInjectField {
+                @Inject
+                @Named("ChosenOne")
+                @Skywalker
+                Dependency dependency;
+            }
+
+            @Test
+            public void should_throw_exception_if_multi_qualifiers_given() {
+                assertThrows(IllegalComponentException.class,
+                        () -> new InjectionProvider<>(MultiQualifiersInjectField.class));
+            }
         }
     }
 
@@ -367,9 +435,51 @@ public class InjectionTest {
 
         @Nested
         class WithQualifier {
-            // TODO: inject with qualifier
-            // TODO: include qualifier with dependency
-            // TODO: throw illegal component if illegal qualifier given to injection point
+
+            @BeforeEach
+            public void beforeEach() {
+                Mockito.reset(context);
+                when(context.get(eq(ComponentRef.of(Dependency.class, new NamedLiteral("ChosenOne")))))
+                        .thenReturn(Optional.of(dependency));
+            }
+
+            static class InjectMethod {
+                Dependency dependency;
+                @Inject
+                void install(@Named("ChosenOne") Dependency dependency) {
+                    this.dependency = dependency;
+                }
+            }
+
+            // DONE: inject with qualifier
+            @Test
+            public void should_inject_dependency_with_qualifier_via_method() {
+                InjectionProvider<InjectMethod> provider = new InjectionProvider<>(InjectMethod.class);
+                InjectMethod component = provider.get(context);
+                assertSame(dependency, component.dependency);
+            }
+
+            // DONE: include qualifier with dependency
+            @Test
+            public void should_include_dependency_with_qualifier() {
+                InjectionProvider<InjectMethod> provider = new InjectionProvider<>(InjectMethod.class);
+                assertArrayEquals(new ComponentRef<?>[]{ComponentRef.of(Dependency.class, new NamedLiteral("ChosenOne"))}
+                        ,provider.getDependencies().toArray());
+            }
+
+            // DONE: throw illegal component if illegal qualifier given to injection point
+            static class MultiQualifierInjectMethod {
+                @Inject
+                public void install(@Named("ChosenOne") @Skywalker Dependency dependency) {
+
+                }
+            }
+
+            @Test
+            public void should_throw_exception_if_multi_qualifiers_given() {
+                assertThrows(IllegalComponentException.class,
+                        () -> new InjectionProvider<>(MultiQualifierInjectMethod.class));
+            }
         }
     }
 }

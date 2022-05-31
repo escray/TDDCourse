@@ -425,7 +425,7 @@ public class ContextTest {
                 }
             }
 
-            // TODO: check cyclic dependencies with qualifier
+            // DONE: check cyclic dependencies with qualifier
             // @Skywalker A -> @Skywalker B -> @Skywalker A
             // A -> A
             // A -> @Skywalker A not cyclic dependencies
