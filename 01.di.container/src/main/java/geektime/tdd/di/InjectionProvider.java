@@ -25,7 +25,7 @@ class InjectionProvider<T> implements ComponentProvider<T> {
 
         this.injectConstructor = getInjectConstructor(component);
         this.injectMethods = getInjectMethods(component);
-        this.injectFields = getInjectFields(component).stream().map(Injectable::of).toList();
+        this.injectFields = getInjectFields(component);
 
         if (injectFields.stream().map(Injectable::element).anyMatch(f -> Modifier.isFinal(f.getModifiers()))) {
             throw new IllegalComponentException();
@@ -34,29 +34,6 @@ class InjectionProvider<T> implements ComponentProvider<T> {
         if (injectMethods.stream().map(Injectable::element).anyMatch(m -> m.getTypeParameters().length != 0)) {
             throw new IllegalComponentException();
         }
-    }
-
-    private static <T> Injectable<Constructor<T>> getInjectConstructor(Class<T> component) {
-        List<Constructor<?>> injectConstructors =
-                injectable(component.getConstructors()).toList();
-
-        if (injectConstructors.size() > 1) {
-            throw new IllegalComponentException();
-        }
-
-        return Injectable.of((Constructor<T>) injectConstructors.stream()
-                .findFirst()
-                .orElseGet(() -> defaultConstructor(component)));
-    }
-
-    private static List<Injectable<Method>> getInjectMethods(Class<?> component) {
-        List<Method> injectMethods = traverse(component,
-                (methods, current) -> injectable(current.getDeclaredMethods())
-                        .filter(m -> isOverrideByInjectMethod(methods, m))
-                        .filter(m -> isOverrideByNoInjectMethod(component, m))
-                        .toList());
-        Collections.reverse(injectMethods);
-        return injectMethods.stream().map(Injectable::of).toList();
     }
 
     @Override
@@ -79,9 +56,13 @@ class InjectionProvider<T> implements ComponentProvider<T> {
 
     @Override
     public List<ComponentRef<?>> getDependencies() {
-        return concat(concat(stream(injectConstructor.required()),
-                        injectFields.stream().flatMap(f -> stream(f.required()))),
-                injectMethods.stream().flatMap(m -> stream(m.required()))).toList();
+        return concat(concat(Stream.of(injectConstructor), injectFields.stream()),
+                injectMethods.stream())
+//                .map(Injectable::element).flatMap(Array::stream).toList()
+                .flatMap( i -> stream(i.required())).toList();
+//        return concat(concat(stream(injectConstructor.required()),
+//                        injectFields.stream().flatMap(f -> stream(f.required()))),
+//                injectMethods.stream().flatMap(m -> stream(m.required()))).toList();
     }
 
     static record Injectable<Element extends AccessibleObject>(Element element, ComponentRef<?>[] required) {
@@ -118,9 +99,33 @@ class InjectionProvider<T> implements ComponentProvider<T> {
         }
     }
 
-    private static <T> List<Field> getInjectFields(Class<T> component) {
-        return traverse(component,
-                (fields, current) -> injectable(current.getDeclaredFields()).toList());
+    private static <T> Injectable<Constructor<T>> getInjectConstructor(Class<T> component) {
+        List<Constructor<?>> injectConstructors =
+                injectable(component.getConstructors()).toList();
+
+        if (injectConstructors.size() > 1) {
+            throw new IllegalComponentException();
+        }
+
+        return Injectable.of((Constructor<T>) injectConstructors.stream()
+                .findFirst()
+                .orElseGet(() -> defaultConstructor(component)));
+    }
+
+    private static List<Injectable<Method>> getInjectMethods(Class<?> component) {
+        List<Method> injectMethods = traverse(component,
+                (methods, current) -> injectable(current.getDeclaredMethods())
+                        .filter(m -> isOverrideByInjectMethod(methods, m))
+                        .filter(m -> isOverrideByNoInjectMethod(component, m))
+                        .toList());
+        Collections.reverse(injectMethods);
+        return injectMethods.stream().map(Injectable::of).toList();
+    }
+
+    private static <T> List<Injectable<Field>> getInjectFields(Class<T> component) {
+        return InjectionProvider.<Field>traverse(component,
+                        (fields, current) -> injectable(current.getDeclaredFields()).toList())
+                .stream().map(Injectable::of).toList();
     }
 
     private static <Type> Constructor<Type> defaultConstructor(Class<Type> implementation) {
