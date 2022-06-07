@@ -58,11 +58,7 @@ class InjectionProvider<T> implements ComponentProvider<T> {
     public List<ComponentRef<?>> getDependencies() {
         return concat(concat(Stream.of(injectConstructor), injectFields.stream()),
                 injectMethods.stream())
-//                .map(Injectable::element).flatMap(Array::stream).toList()
                 .flatMap( i -> stream(i.required())).toList();
-//        return concat(concat(stream(injectConstructor.required()),
-//                        injectFields.stream().flatMap(f -> stream(f.required()))),
-//                injectMethods.stream().flatMap(m -> stream(m.required()))).toList();
     }
 
     static record Injectable<Element extends AccessibleObject>(Element element, ComponentRef<?>[] required) {
