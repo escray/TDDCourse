@@ -61,9 +61,10 @@ class InjectionProvider<T> implements ComponentProvider<T> {
                 .flatMap( i -> stream(i.required())).toList();
     }
 
-    static record Injectable<Element extends AccessibleObject>(Element element, ComponentRef<?>[] required) {
-        static <Element extends Executable> Injectable<Element> of(Element constructor) {
-            return new Injectable<>(constructor, stream(constructor.getParameters())
+    record Injectable<Element extends AccessibleObject>(Element element, ComponentRef<?>[] required) {
+
+        static <Element extends Executable> Injectable<Element> of(Element element) {
+            return new Injectable<>(element, stream(element.getParameters())
                     .map(Injectable::toComponentRef)
                     .toArray(ComponentRef<?>[]::new));
         }

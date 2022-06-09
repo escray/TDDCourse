@@ -1,18 +1,11 @@
 package geektime.tdd.di;
 
-import jakarta.inject.Qualifier;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Objects;
 
 public class ComponentRef<ComponentType> {
-    public ComponentRef(Annotation qualifier) {
-        Type type = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-        init(type, qualifier);
-    }
-
     public static <ComponentType> ComponentRef<ComponentType> of(Class<ComponentType> component) {
         return new ComponentRef(component, null);
     }
@@ -36,9 +29,13 @@ public class ComponentRef<ComponentType> {
         init(type, qualifier);
     }
 
-    protected ComponentRef() {
+    public ComponentRef(Annotation qualifier) {
         Type type = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-        init(type, null);
+        init(type, qualifier);
+    }
+
+    protected ComponentRef() {
+        this(null);
     }
 
     private void init(Type type, Annotation qualifier) {
