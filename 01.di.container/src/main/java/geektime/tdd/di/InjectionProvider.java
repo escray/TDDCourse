@@ -77,7 +77,7 @@ class InjectionProvider<T> implements ComponentProvider<T> {
             return stream(required).map(context::get).map(Optional::get).toArray();
         }
 
-        // TODO: 2 -> 1 ?
+        // DONE: 2 -> 1 ?
         private static ComponentRef<?> toComponentRef(Field field) {
             return ComponentRef.of(field.getGenericType(), getQualifier(field));
         }

@@ -276,7 +276,7 @@ public class InjectionTest {
                         provider.getDependencies().toArray());
             }
 
-            // TODO: throw illegal component if illegal qualifier given to injection point
+            // DONE: throw illegal component if illegal qualifier given to injection point
             static class MultiQualifiersInjectField {
                 @Inject
                 @Named("ChosenOne")

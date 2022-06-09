@@ -2,6 +2,7 @@ package geektime.tdd.di;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import jakarta.inject.Singleton;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -181,8 +182,7 @@ public class ContextTest {
                         () -> config.bind(InjectConstructor.class, InjectConstructor.class, new TestLiteral()));
             }
 
-            // TODO: Provider
-
+            // DONE: Provider
             @Test
             public void should_retrieve_bind_type_as_provider() {
                 config.bind(TestComponent.class, instance,
@@ -200,6 +200,45 @@ public class ContextTest {
 
                 assertTrue(component.isEmpty());
             }
+        }
+
+        @Nested
+        public class WithScope {
+            // DONE: default scope should not be singleton
+            static class NotSingleton {
+            }
+
+            @Test
+            public void should_not_be_singleton_scope_by_default() {
+                config.bind(NotSingleton.class, NotSingleton.class);
+                Context context = config.getContext();
+                assertNotSame(context.get(ComponentRef.of(NotSingleton.class)).get(),
+                        context.get(ComponentRef.of(NotSingleton.class)));
+            }
+
+            @Nested
+            public class WithQualifier {
+                @Test
+                public void should_not_be_singleton_scope_by_default() {
+                    config.bind(NotSingleton.class, NotSingleton.class, new SkywalkerLiteral());
+                    Context context = config.getContext();
+                    assertNotSame(context.get(ComponentRef.of(NotSingleton.class, new SkywalkerLiteral())).get(),
+                            context.get(ComponentRef.of(NotSingleton.class, new SkywalkerLiteral())));
+                }
+            }
+
+            // TODO: bind component as singleton scoped
+
+            @Test
+            public void should_bind_component_as_singleton_scope() {
+
+            }
+
+
+            // TODO: bind component with qualifier as singleton scoped
+            // TODO: get scope from component class
+            // TODO: get scope from component with qualifier
+            // TODO: bind component with customize scope annotation
         }
     }
 
@@ -229,6 +268,9 @@ public class ContextTest {
                     Arguments.of(Named.of("Provider in Inject Field", MissingDependencyProviderField.class)),
                     Arguments.of(Named.of("Provider in Inject Method", MissingDependencyProviderMethod.class)));
         }
+
+        // TODO: missing dependencies with scope
+
 
         static class MissingDependencyConstructor implements TestComponent {
             @Inject
@@ -294,6 +336,8 @@ public class ContextTest {
             }
             return arguments.stream();
         }
+
+        // TODO: cyclic dependencies with scope
 
         static class CyclicComponentInjectConstructor implements TestComponent {
             @Inject
@@ -582,51 +626,4 @@ public class ContextTest {
             }
         }
     }
-}
-
-record NamedLiteral(String value) implements jakarta.inject.Named {
-    @Override
-    public Class<? extends Annotation> annotationType() {
-        return jakarta.inject.Named.class;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o instanceof jakarta.inject.Named named) {
-            return Objects.equals(value, named.value());
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return "value".hashCode() * 127 ^ value.hashCode();
-    }
-}
-
-@java.lang.annotation.Documented
-@java.lang.annotation.Retention(RUNTIME)
-@jakarta.inject.Qualifier
-@interface Skywalker {
-}
-
-record SkywalkerLiteral() implements Skywalker {
-    @Override
-    public Class<? extends Annotation> annotationType() {
-        return Skywalker.class;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof Skywalker;
-    }
-}
-
-record TestLiteral() implements Test {
-    @Override
-    public Class<? extends Annotation> annotationType() {
-        return Test.class;
-    }
-
-
 }
